@@ -1,5 +1,5 @@
 from .user import User
-from .farm import Farm
+from .farm import Farm, FarmMembership
 from .cattle import Cattle, CattleGender, CattleStatus
 from .logs import HealthLog, Vaccination, Medicine, MilkLog, FeedLog, BreedingLog, Alert, Document
 
