@@ -35,18 +35,18 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-ivory flex items-center justify-center px-4 py-20">
+    <div className="min-h-screen bg-ivory flex items-center justify-center px-4 py-12 md:py-20">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white p-12 rounded-[40px] border border-black/5 shadow-premium max-w-xl w-full"
+        className="bg-white p-8 md:p-12 rounded-[32px] md:rounded-[40px] border border-black/5 shadow-premium max-w-xl w-full my-8"
       >
-        <button onClick={() => router.push('/')} className="mb-10 flex items-center gap-2 text-black/30 font-bold text-xs uppercase tracking-widest hover:text-black transition-colors">
+        <button onClick={() => router.push('/')} className="mb-8 md:mb-10 flex items-center gap-2 text-black/30 font-bold text-[10px] md:text-xs uppercase tracking-widest hover:text-black transition-colors">
           <ArrowLeft size={16} /> Back to home
         </button>
 
-        <h1 className="text-4xl font-black mb-2 tracking-tight">Create your account</h1>
-        <p className="text-black/40 font-medium mb-12">Join the community of modern cattle farmers.</p>
+        <h1 className="text-3xl md:text-4xl font-black mb-2 tracking-tight">Create your account</h1>
+        <p className="text-black/40 font-medium mb-8 md:mb-12 text-sm md:text-base">Join the community of modern cattle farmers.</p>
 
         <form onSubmit={handleRegister} className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="md:col-span-2">

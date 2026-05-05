@@ -75,14 +75,14 @@ export default function LoginPage() {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white p-12 rounded-[48px] border border-black/5 shadow-2xl max-w-md w-full relative z-10"
+        className="bg-white p-8 md:p-12 rounded-[32px] md:rounded-[48px] border border-black/5 shadow-2xl max-w-md w-full relative z-10 my-8"
       >
-        <div className="mb-10 text-center">
-           <div className="w-16 h-16 bg-patch-black rounded-[20px] flex items-center justify-center mx-auto mb-6 shadow-xl">
-              <div className="w-6 h-6 bg-white rounded-md"></div>
+        <div className="mb-8 md:mb-10 text-center">
+           <div className="w-14 h-14 md:w-16 md:h-16 bg-patch-black rounded-[18px] md:rounded-[20px] flex items-center justify-center mx-auto mb-6 shadow-xl">
+              <div className="w-5 h-5 md:w-6 md:h-6 bg-white rounded-md"></div>
            </div>
-           <h1 className="text-4xl font-black tracking-tight mb-2">CattleOS</h1>
-           <p className="text-black/30 font-bold uppercase tracking-widest text-[10px]">Secure Digital Passport System</p>
+           <h1 className="text-3xl md:text-4xl font-black tracking-tight mb-2">CattleOS</h1>
+           <p className="text-black/30 font-bold uppercase tracking-widest text-[9px] md:text-[10px]">Secure Digital Passport System</p>
         </div>
 
         <AnimatePresence mode="wait">

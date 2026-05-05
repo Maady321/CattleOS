@@ -72,18 +72,21 @@ export default function CattlePage() {
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by name or tag ID..."
             className="w-full pl-16 pr-8 py-4 rounded-2xl bg-white border border-black/5 shadow-sm outline-none focus:border-grass-green transition-all font-bold"
+            suppressHydrationWarning
           />
         </div>
         <div className="flex gap-4 w-full md:w-auto">
           <button 
             onClick={() => setIsScannerOpen(true)}
             className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-4 bg-white rounded-2xl border border-black/5 font-bold text-black/60 hover:bg-black/5 transition-all"
+            suppressHydrationWarning
           >
             <QrCode size={20} /> Scan Tag
           </button>
           <button 
             onClick={() => setIsModalOpen(true)}
             className="flex-1 md:flex-none flex items-center justify-center gap-2 px-8 py-4 bg-patch-black text-white rounded-2xl font-black shadow-premium hover:scale-105 active:scale-95 transition-all"
+            suppressHydrationWarning
           >
             <Plus size={20} /> Add Cattle
           </button>
