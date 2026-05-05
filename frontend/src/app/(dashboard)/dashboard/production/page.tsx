@@ -19,6 +19,11 @@ export default function ProductionPage() {
   const [isLabModalOpen, setIsLabModalOpen] = useState(false);
   const [timeRange, setTimeRange] = useState('7D');
   const [selectedLog, setSelectedLog] = useState<any>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
   const [bulkLabData, setBulkLabData] = useState({
     fat: '0.0',
     protein: '0.0',
@@ -28,7 +33,14 @@ export default function ProductionPage() {
   });
 
   const chartData = React.useMemo(() => {
-    if (productionLogs.length === 0) return [];
+    const limit = timeRange === '7D' ? 7 : timeRange === '30D' ? 30 : 180;
+    
+    // Generate all dates in range
+    const dates = Array.from({ length: limit }, (_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+    }).reverse();
 
     const grouped = productionLogs.reduce((acc: any, log) => {
       const date = log.date;
@@ -41,13 +53,11 @@ export default function ProductionPage() {
       return acc;
     }, {});
 
-    const limit = timeRange === '7D' ? 7 : timeRange === '30D' ? 30 : 180;
-
-    return Object.entries(grouped).map(([date, data]: [string, any]) => ({
+    return dates.map(date => ({
       date,
-      yield: data.yield,
-      fat: parseFloat((data.fatSum / data.count).toFixed(2))
-    })).slice(0, limit).reverse();
+      yield: grouped[date]?.yield || 0,
+      fat: grouped[date] ? parseFloat((grouped[date].fatSum / grouped[date].count).toFixed(2)) : 0
+    }));
   }, [productionLogs, timeRange]);
   const [newLog, setNewLog] = useState({
     cow: '',
@@ -200,28 +210,29 @@ export default function ProductionPage() {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
         {[
-          { label: "Today's Yield", value: `${productionLogs.filter(l => l.date === new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })).reduce((acc, l) => acc + parseFloat(l.yield || '0'), 0).toFixed(1)}L`, icon: Droplets, color: 'text-blue-500', bg: 'bg-blue-50', trend: 'Live' },
-          { label: 'Weekly Average', value: `${(productionLogs.reduce((acc, l) => acc + parseFloat(l.yield || '0'), 0) / Math.max(1, productionLogs.length / 2)).toFixed(1)}L`, icon: TrendingUp, color: 'text-grass-green', bg: 'bg-green-50', trend: '+0%' },
-          { label: 'Estimated Revenue', value: `₹${(productionLogs.reduce((acc, l) => acc + parseFloat(l.yield || '0'), 0) * 45).toLocaleString()}`, icon: DollarSign, color: 'text-patch-black', bg: 'bg-gray-100', trend: '+0%' },
-          { label: 'Avg Fat Content', value: `${(productionLogs.reduce((acc, l) => acc + parseFloat(l.fat || '0'), 0) / Math.max(1, productionLogs.length)).toFixed(2)}%`, icon: Milk, color: 'text-orange-500', bg: 'bg-orange-50', trend: 'Stable' },
+          { label: "Today's Yield", value: `${productionLogs.filter(l => l.date === new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })).reduce((acc, l) => acc + parseFloat(l.yield || '0'), 0).toFixed(1)}L`, icon: Droplets, color: 'text-white', bg: 'bg-grass-green', shadow: 'shadow-green-200', trend: 'Live' },
+          { label: 'Weekly Average', value: `${(productionLogs.reduce((acc, l) => acc + parseFloat(l.yield || '0'), 0) / Math.max(1, productionLogs.length / 2)).toFixed(1)}L`, icon: TrendingUp, color: 'text-white', bg: 'bg-emerald-600', shadow: 'shadow-emerald-200', trend: '+0%' },
+          { label: 'Estimated Revenue', value: `₹${(productionLogs.reduce((acc, l) => acc + parseFloat(l.yield || '0'), 0) * 45).toLocaleString()}`, icon: DollarSign, color: 'text-white', bg: 'bg-patch-black', shadow: 'shadow-gray-200', trend: '+0%' },
+          { label: 'Avg Fat Content', value: `${(productionLogs.reduce((acc, l) => acc + parseFloat(l.fat || '0'), 0) / Math.max(1, productionLogs.length)).toFixed(2)}%`, icon: Milk, color: 'text-white', bg: 'bg-green-700', shadow: 'shadow-green-300', trend: 'Stable' },
         ].map((stat, i) => (
           <motion.div 
             key={i}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
-            className="bg-white p-6 rounded-3xl border border-black/5 shadow-premium"
+            className="bg-white p-6 md:p-8 rounded-[32px] border border-black/5 shadow-premium hover:shadow-2xl transition-all duration-300 group overflow-hidden relative"
           >
+            <div className={`absolute top-0 right-0 w-24 h-24 ${stat.bg} opacity-[0.03] rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-150 duration-500`}></div>
             <div className="flex justify-between items-start mb-6">
-              <div className={`w-12 h-12 ${stat.bg} ${stat.color} rounded-2xl flex items-center justify-center`}>
-                <stat.icon size={24} />
+              <div className={`w-12 h-12 md:w-14 md:h-14 ${stat.bg} ${stat.color} rounded-[20px] flex items-center justify-center shadow-lg ${stat.shadow} group-hover:rotate-6 transition-all duration-300`}>
+                <stat.icon size={26} strokeWidth={2.5} />
               </div>
-              <span className={`text-xs font-black px-3 py-1 rounded-full ${stat.trend.startsWith('+') ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
+              <span className={`text-[10px] font-black px-3 py-1.5 rounded-full ${stat.trend.startsWith('+') || stat.trend === 'Live' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
                 {stat.trend}
               </span>
             </div>
-            <p className="text-xs font-black uppercase tracking-widest text-black/30 mb-1">{stat.label}</p>
-            <p className="text-3xl font-black tracking-tight">{stat.value}</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-black/30 mb-2">{stat.label}</p>
+            <h3 className="text-3xl font-black tracking-tighter text-patch-black">{stat.value}</h3>
           </motion.div>
         ))}
       </div>
@@ -244,33 +255,41 @@ export default function ProductionPage() {
             </div>
           </div>
           <div className="h-[350px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData}>
-                <defs>
-                  <linearGradient id="colorYield" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#2ECC71" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#2ECC71" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                <XAxis 
-                  dataKey="date" 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{ fontSize: 12, fontWeight: 700, fill: '#ccc' }}
-                  dy={10}
-                />
-                <YAxis 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{ fontSize: 12, fontWeight: 700, fill: '#ccc' }}
-                />
-                <Tooltip 
-                  contentStyle={{ borderRadius: '20px', border: 'none', boxShadow: '0 20px 50px rgba(0,0,0,0.1)', padding: '20px' }}
-                />
-                <Area type="monotone" dataKey="yield" stroke="#2ECC71" strokeWidth={4} fillOpacity={1} fill="url(#colorYield)" />
-              </AreaChart>
-            </ResponsiveContainer>
+            {isMounted && chartData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData}>
+                  <defs>
+                    <linearGradient id="colorYield" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#2ECC71" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#2ECC71" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                  <XAxis 
+                    dataKey="date" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fontSize: 12, fontWeight: 700, fill: '#ccc' }}
+                    dy={10}
+                  />
+                  <YAxis 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fontSize: 12, fontWeight: 700, fill: '#ccc' }}
+                  />
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '20px', border: 'none', boxShadow: '0 20px 50px rgba(0,0,0,0.1)', padding: '20px' }}
+                  />
+                  <Area type="monotone" dataKey="yield" stroke="#2ECC71" strokeWidth={5} fillOpacity={1} fill="url(#colorYield)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : isMounted ? (
+              <div className="h-full flex items-center justify-center text-center text-black/20 font-black uppercase tracking-widest text-sm bg-black/[0.02] rounded-[32px] border border-dashed border-black/10">
+                Record your first yield to see trends
+              </div>
+            ) : (
+              <div className="h-full w-full bg-black/5 animate-pulse rounded-[32px]"></div>
+            )}
           </div>
         </div>
 
@@ -641,17 +660,25 @@ export default function ProductionPage() {
                       <span className="text-grass-green font-black text-sm">+0.2% vs Last Week</span>
                    </div>
                    <div className="h-[200px] w-full">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={chartData}>
-                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#ffffff10" />
-                          <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#ffffff40' }} />
-                          <Tooltip 
-                            contentStyle={{ backgroundColor: '#111', border: 'none', borderRadius: '12px' }}
-                            itemStyle={{ color: '#fff' }}
-                          />
-                          <Line type="monotone" dataKey="fat" stroke="#F1C40F" strokeWidth={3} dot={{ fill: '#F1C40F', r: 4 }} />
-                        </LineChart>
-                      </ResponsiveContainer>
+                      {isMounted && chartData.length > 0 ? (
+                        <ResponsiveContainer width="100%" height="100%">
+                          <LineChart data={chartData}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#ffffff10" />
+                            <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#ffffff40' }} />
+                            <Tooltip 
+                              contentStyle={{ backgroundColor: '#111', border: 'none', borderRadius: '12px' }}
+                              itemStyle={{ color: '#fff' }}
+                            />
+                            <Line type="monotone" dataKey="fat" stroke="#2ECC71" strokeWidth={5} dot={{ fill: '#2ECC71', r: 6 }} />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      ) : isMounted ? (
+                        <div className="h-full flex items-center justify-center text-center text-white/20 font-black uppercase tracking-widest text-[10px]">
+                          Insufficient quality data
+                        </div>
+                      ) : (
+                        <div className="h-full w-full bg-white/5 animate-pulse rounded-2xl"></div>
+                      )}
                    </div>
                 </div>
 

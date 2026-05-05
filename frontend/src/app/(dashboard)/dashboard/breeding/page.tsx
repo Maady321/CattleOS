@@ -109,23 +109,24 @@ export default function BreedingPage() {
       {/* Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
         {[
-          { label: 'Active Inseminations', value: breedingLogs.filter(l => l.type === 'Insemination').length, icon: Pipette, color: 'text-blue-500', bg: 'bg-blue-50' },
-          { label: 'Confirmed Pregnancies', value: breedingLogs.filter(l => l.type === 'Pregnancy Check' && l.status === 'Confirmed').length, icon: Baby, color: 'text-grass-green', bg: 'bg-green-50' },
-          { label: 'Cows in Heat', value: breedingLogs.filter(l => l.type === 'Heat').length, icon: Zap, color: 'text-orange-500', bg: 'bg-orange-50' },
-          { label: 'Success Rate', value: '0%', icon: Activity, color: 'text-purple-500', bg: 'bg-purple-50' },
+          { label: 'Active Inseminations', value: breedingLogs.filter(l => l.type === 'Insemination').length, icon: Pipette, color: 'text-white', bg: 'bg-emerald-600', shadow: 'shadow-emerald-200' },
+          { label: 'Confirmed Pregnancies', value: breedingLogs.filter(l => l.type === 'Pregnancy Check' && l.status === 'Confirmed').length, icon: Baby, color: 'text-white', bg: 'bg-grass-green', shadow: 'shadow-green-200' },
+          { label: 'Cows in Heat', value: breedingLogs.filter(l => l.type === 'Heat').length, icon: Zap, color: 'text-white', bg: 'bg-orange-500', shadow: 'shadow-orange-200' },
+          { label: 'Success Rate', value: '0%', icon: Activity, color: 'text-white', bg: 'bg-patch-black', shadow: 'shadow-gray-200' },
         ].map((stat, i) => (
           <motion.div 
             key={i}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
-            className="bg-white p-6 rounded-3xl border border-black/5 shadow-premium"
+            className="bg-white p-6 md:p-8 rounded-[32px] border border-black/5 shadow-premium hover:shadow-2xl transition-all duration-300 group overflow-hidden relative"
           >
-            <div className={`w-12 h-12 ${stat.bg} ${stat.color} rounded-2xl flex items-center justify-center mb-4`}>
-              <stat.icon size={24} />
+            <div className={`absolute top-0 right-0 w-24 h-24 ${stat.bg} opacity-[0.03] rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-150 duration-500`}></div>
+            <div className={`w-12 h-12 md:w-14 md:h-14 ${stat.bg} ${stat.color} rounded-[20px] flex items-center justify-center mb-6 shadow-lg ${stat.shadow} group-hover:rotate-6 transition-all duration-300`}>
+              <stat.icon size={26} strokeWidth={2.5} />
             </div>
-            <p className="text-xs font-black uppercase tracking-widest text-black/30 mb-1">{stat.label}</p>
-            <p className="text-3xl font-black tracking-tight">{stat.value}</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-black/30 mb-2">{stat.label}</p>
+            <h3 className="text-3xl font-black tracking-tighter text-patch-black">{stat.value}</h3>
           </motion.div>
         ))}
       </div>

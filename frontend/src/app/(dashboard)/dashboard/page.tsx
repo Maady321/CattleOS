@@ -14,15 +14,20 @@ export default function OverviewPage() {
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [scannedCow, setScannedCow] = useState<any>(null);
+  const [isMounted, setIsMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const totalYield = productionLogs.reduce((acc, log) => acc + parseFloat(log.yield || '0'), 0);
   const revenue = totalYield * 45; // Assuming ₹45 per Liter
 
   const stats = [
-    { label: 'Total Milk', value: `${totalYield.toFixed(0)}L`, icon: Milk, color: 'text-blue-500', bg: 'bg-blue-50' },
-    { label: 'Total Animals', value: cattle.length.toString(), icon: Activity, color: 'text-grass-green', bg: 'bg-green-50' },
-    { label: 'Monthly Growth', value: '0%', icon: TrendingUp, color: 'text-orange-500', bg: 'bg-orange-50' },
-    { label: 'Estimated Revenue', value: `₹${revenue.toLocaleString()}`, icon: DollarSign, color: 'text-purple-500', bg: 'bg-purple-50' },
+    { label: 'Total Milk', value: `${totalYield.toFixed(0)}L`, icon: Milk, color: 'text-white', bg: 'bg-grass-green', shadow: 'shadow-green-200' },
+    { label: 'Total Animals', value: cattle.length.toString(), icon: Activity, color: 'text-white', bg: 'bg-patch-black', shadow: 'shadow-gray-200' },
+    { label: 'Monthly Growth', value: '0%', icon: TrendingUp, color: 'text-white', bg: 'bg-emerald-600', shadow: 'shadow-emerald-200' },
+    { label: 'Estimated Revenue', value: `₹${revenue.toLocaleString()}`, icon: DollarSign, color: 'text-white', bg: 'bg-green-700', shadow: 'shadow-green-300' },
   ];
 
   const getTypeStyles = (type: AlertType) => {
@@ -43,14 +48,24 @@ export default function OverviewPage() {
   };
 
   const chartData = React.useMemo(() => {
-    const grouped = productionLogs.slice(0, 7).reduce((acc: any, log) => {
+    // Get last 7 days dates
+    const dates = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+    }).reverse();
+
+    const grouped = productionLogs.reduce((acc: any, log) => {
       const date = log.date;
       if (!acc[date]) acc[date] = 0;
       acc[date] += parseFloat(log.yield || '0');
       return acc;
     }, {});
 
-    return Object.entries(grouped).map(([name, liters]) => ({ name, liters }));
+    return dates.map(date => ({
+      name: date,
+      liters: grouped[date] || 0
+    }));
   }, [productionLogs]);
 
   const handleScan = (data: string) => {
@@ -103,13 +118,14 @@ export default function OverviewPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
-            className="p-6 md:p-8 bg-white rounded-[24px] border border-black/5 shadow-sm"
+            className={`p-6 md:p-8 bg-white rounded-[32px] border border-black/5 shadow-premium hover:shadow-2xl transition-all duration-300 group overflow-hidden relative`}
           >
-            <div className={`w-10 h-10 md:w-12 md:h-12 ${stat.bg} rounded-xl flex items-center justify-center ${stat.color} mb-4 md:mb-6`}>
-              <stat.icon size={24} />
+            <div className={`absolute top-0 right-0 w-24 h-24 ${stat.bg} opacity-[0.03] rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-150 duration-500`}></div>
+            <div className={`w-12 h-12 md:w-14 md:h-14 ${stat.bg} rounded-[20px] flex items-center justify-center ${stat.color} mb-6 shadow-lg ${stat.shadow} group-hover:rotate-6 transition-all duration-300`}>
+              <stat.icon size={28} strokeWidth={2.5} />
             </div>
-            <p className="text-black/40 font-bold text-xs md:text-sm uppercase tracking-wider mb-1">{stat.label}</p>
-            <h3 className="text-2xl md:text-3xl font-extrabold">{stat.value}</h3>
+            <p className="text-black/30 font-black text-[10px] md:text-xs uppercase tracking-[0.2em] mb-2">{stat.label}</p>
+            <h3 className="text-3xl md:text-4xl font-black tracking-tighter text-patch-black">{stat.value}</h3>
           </motion.div>
         ))}
       </div>
@@ -125,7 +141,7 @@ export default function OverviewPage() {
             </select>
           </div>
           <div className="h-[250px] md:h-[300px] w-full">
-            {chartData.length > 0 ? (
+            {isMounted && chartData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
@@ -138,17 +154,19 @@ export default function OverviewPage() {
                   <Line 
                     type="monotone" 
                     dataKey="liters" 
-                    stroke="#2D5A27" 
-                    strokeWidth={3} 
-                    dot={{ r: 4, fill: '#2D5A27', strokeWidth: 0 }} 
-                    activeDot={{ r: 6, strokeWidth: 0 }}
+                    stroke="#2ECC71" 
+                    strokeWidth={5} 
+                    dot={{ r: 6, fill: '#2ECC71', strokeWidth: 0 }} 
+                    activeDot={{ r: 8, strokeWidth: 0 }}
                   />
                 </LineChart>
               </ResponsiveContainer>
-            ) : (
+            ) : isMounted ? (
               <div className="h-full flex items-center justify-center text-center text-black/20 font-bold uppercase tracking-widest text-xs md:text-sm bg-black/[0.02] rounded-3xl border border-dashed border-black/10 px-6">
                 No production data recorded
               </div>
+            ) : (
+              <div className="h-full w-full bg-black/5 animate-pulse rounded-3xl"></div>
             )}
           </div>
         </div>
