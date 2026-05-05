@@ -1,0 +1,55 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ivory: #FDFDFD;
+  --color-patch-black: #0A0A0A;
+  --color-grass-green: #2D5A27;
+  --color-grass-green-light: #4ADE80;
+  
+  --radius-xl: 24px;
+  --radius-2xl: 32px;
+  
+  --shadow-premium: 0 10px 30px -5px rgba(0, 0, 0, 0.1), 0 4px 12px -5px rgba(0, 0, 0, 0.05);
+}
+
+:root {
+  --background: var(--color-ivory);
+  --foreground: var(--color-patch-black);
+  
+  --primary: var(--color-patch-black);
+  --primary-foreground: var(--color-ivory);
+  
+  --accent: var(--color-grass-green);
+  --accent-foreground: var(--color-ivory);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: 'Inter', sans-serif;
+  overflow-x: hidden;
+}
+
+.cow-patch {
+  background-color: var(--color-patch-black);
+  clip-path: polygon(10% 0%, 100% 0%, 90% 100%, 0% 100%); /* Example abstract shape */
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+@keyframes swing {
+  0% { transform: rotate(0deg); }
+  20% { transform: rotate(15deg); }
+  40% { transform: rotate(-10deg); }
+  60% { transform: rotate(5deg); }
+  80% { transform: rotate(-5deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.animate-swing {
+  animation: swing 2s ease infinite;
+  transform-origin: top center;
+}
