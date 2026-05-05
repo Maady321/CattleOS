@@ -34,7 +34,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           email: session.user.email,
           full_name: session.user.user_metadata?.full_name || 'Farm Owner'
         });
-        router.push('/dashboard');
+        
+        // Only redirect if we're on a public page
+        if (window.location.pathname === '/' || window.location.pathname === '/login') {
+          router.push('/dashboard');
+        }
       } else if (event === 'SIGNED_OUT') {
         logout();
         router.push('/');

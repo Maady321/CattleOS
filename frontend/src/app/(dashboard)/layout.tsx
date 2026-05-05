@@ -6,6 +6,7 @@ import { useAuthStore } from '@/store/authStore';
 import { useCattleStore } from '@/store/cattleStore';
 import { useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import Link from 'next/link';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { logout, user } = useAuthStore();
@@ -45,7 +46,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       <nav className="flex-1 space-y-2">
         {menuItems.map((item) => (
-          <a
+          <Link
             key={item.href}
             href={item.href}
             onClick={() => setIsSidebarOpen(false)}
@@ -57,15 +58,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           >
             <item.icon size={22} />
             {item.label}
-          </a>
+          </Link>
         ))}
       </nav>
 
       <div className="mt-auto pt-8 border-t border-black/5 space-y-2">
-        <a href="/dashboard/settings" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-4 px-6 py-4 rounded-2xl font-bold text-black/40 hover:bg-black/5 hover:text-black transition-all">
+        <Link href="/dashboard/settings" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-4 px-6 py-4 rounded-2xl font-bold text-black/40 hover:bg-black/5 hover:text-black transition-all">
           <Settings size={22} />
           Settings
-        </a>
+        </Link>
         <button 
           onClick={handleLogout}
           className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-bold text-red-500 hover:bg-red-50/50 transition-all text-left"
