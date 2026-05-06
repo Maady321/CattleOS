@@ -27,16 +27,18 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       xl: 'px-10 py-5 text-lg font-bold', // Rural optimized
     };
 
+    const MotionButton = motion.button as any;
+
     return (
-      <motion.button
+      <MotionButton
         ref={ref}
         whileTap={{ scale: 0.98 }}
         className={`inline-flex items-center justify-center gap-2 rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed ${variants[variant]} ${sizes[size]} ${className}`}
-        {...(props as any)}
+        {...props}
       >
         {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : leftIcon}
         {children}
-      </motion.button>
+      </MotionButton>
     );
   }
 );
