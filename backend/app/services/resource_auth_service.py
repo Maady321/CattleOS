@@ -100,6 +100,9 @@ class ResourceAuthService:
         return True
 
     def _log_denial(self, db: Session, user: User, resource_type: str, resource_id: Any, reason: str, request: Optional[Request]):
+        from app.core.metrics import metrics_manager
+        metrics_manager.track_rbac_denial(role=user.role, resource=resource_type)
+        
         audit_service.log_event(
             db,
             "ACCESS_DENIED",

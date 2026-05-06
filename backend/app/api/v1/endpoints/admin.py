@@ -5,7 +5,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from app.api import deps
 from app.services.audit_service import audit_service
-from app.core.rbac import has_permission, Permission
+from app.api.deps import has_permission
+from app.core.permissions import Permission
 
 router = APIRouter()
 

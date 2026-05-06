@@ -7,7 +7,7 @@ import enum
 
 class UserRole(str, enum.Enum):
     SUPERADMIN = "superadmin"
-    FARM_OWNER = "farm_owner"
+    OWNER = "owner"
     MANAGER = "manager"
     WORKER = "worker"
     VET = "vet"

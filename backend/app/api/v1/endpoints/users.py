@@ -2,7 +2,8 @@ from typing import Any, List
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from app.api import deps
-from app.core.rbac import has_permission, Permission
+from app.api.deps import has_permission
+from app.core.permissions import Permission
 from app.models.user import User, UserRole
 from app.services.invitation_service import invitation_service
 from app.services import user as user_service

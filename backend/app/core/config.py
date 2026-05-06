@@ -64,6 +64,11 @@ class Settings(BaseSettings):
     SMTP_PASSWORD: Optional[str] = None
     SENDER_EMAIL: Optional[str] = None
 
+    # Observability
+    SENTRY_DSN: Optional[str] = None
+    ENABLE_METRICS: bool = True
+    LOG_LEVEL: str = "INFO"
+    
     class Config:
         case_sensitive = True
         env_file = ".env"

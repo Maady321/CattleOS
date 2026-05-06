@@ -15,6 +15,7 @@ from app.services.audit_service import audit_service
 from app.services.session_service import session_service
 from app.services.bot_protection_service import bot_service
 from app.models.session import UserSession
+from app.core.metrics import metrics_manager
 import random
 import logging
 
@@ -85,9 +86,12 @@ async def login_initiate(
     user = user_service.authenticate(db, identifier=login_in.identifier, password=login_in.password)
     
     if not user:
+        metrics_manager.track_auth(method="password", status="failure")
         await security_service.track_failure(request, login_in.identifier)
         audit_service.log_event(db, "LOGIN_FAIL_CREDENTIALS", request=request, metadata={"identifier": login_in.identifier})
         raise HTTPException(status_code=400, detail="Invalid credentials")
+
+    metrics_manager.track_auth(method="password", status="success")
 
     if not user.is_verified:
         raise HTTPException(status_code=403, detail="Account not verified.")
@@ -116,9 +120,12 @@ async def login_verify(
 
     is_valid, message = otp_service.verify_otp(email, otp)
     if not is_valid:
+        metrics_manager.track_auth(method="otp", status="failure")
         await security_service.track_failure(request, email)
         audit_service.log_event(db, "LOGIN_VERIFY_FAIL", user_id=user.id, request=request, metadata={"reason": message})
         raise HTTPException(status_code=400, detail=message)
+
+    metrics_manager.track_auth(method="otp", status="success")
 
     # Success: Create session and tokens
     await security_service.reset_failures(request, email)

@@ -1,6 +1,14 @@
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi import Request, Response
+import time
+import uuid
+import logging
 from app.core.config import settings
+from app.core.logging import correlation_id_ctx
+from app.core.metrics import metrics_manager
+import sentry_sdk
+
+logger = logging.getLogger("app.middleware")
 
 class SecureHeadersMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
@@ -42,3 +50,40 @@ class SecureHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
         
         return response
+
+class ObservabilityMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        # 1. Start timer for metrics
+        start_time = time.time()
+        
+        # 2. Get or create Correlation ID
+        correlation_id = request.headers.get("X-Correlation-ID", str(uuid.uuid4()))
+        token = correlation_id_ctx.set(correlation_id)
+        
+        # 3. Set Sentry context
+        with sentry_sdk.configure_scope() as scope:
+            scope.set_tag("correlation_id", correlation_id)
+            if hasattr(request.state, "user_id"):
+                scope.set_user({"id": str(request.state.user_id)})
+
+        try:
+            response: Response = await call_next(request)
+            
+            # 4. Record latency
+            duration = time.time() - start_time
+            metrics_manager.record_api_latency(
+                method=request.method,
+                endpoint=request.url.path,
+                duration=duration
+            )
+            
+            # 5. Add correlation ID to response headers
+            response.headers["X-Correlation-ID"] = correlation_id
+            return response
+            
+        except Exception as e:
+            # Sentry will catch this automatically if initialized
+            logger.exception(f"Unhandled error in request: {str(e)}")
+            raise
+        finally:
+            correlation_id_ctx.reset(token)

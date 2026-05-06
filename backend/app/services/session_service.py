@@ -87,6 +87,8 @@ class SessionService:
         # 1. Check if token is explicitly revoked
         if self.redis_is_revoked(jti):
             # Potential reuse attack!
+            from app.core.metrics import SESSION_COMPROMISED
+            SESSION_COMPROMISED.inc()
             logger.warning(f"TOKEN REUSE DETECTED: jti {jti}, family {family_id}")
             self.revoke_family(db, family_id)
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Session compromised. Please login again.")
