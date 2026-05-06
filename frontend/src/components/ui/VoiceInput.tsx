@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { MicrophoneIcon, StopIcon, CheckIcon, XMarkIcon, ArrowPathIcon } from '@heroicons/react/24/solid';
+import { Mic, Square, Check, X, RefreshCw } from 'lucide-react';
 
 interface VoiceInputProps {
   onActionConfirmed: (type: string, data: any) => void;
@@ -95,9 +95,9 @@ export default function VoiceInput({ onActionConfirmed }: VoiceInputProps) {
               }`}
             >
               {isListening ? (
-                <StopIcon className="w-10 h-10 text-white" />
+                <Square className="w-10 h-10 text-white" />
               ) : (
-                <MicrophoneIcon className="w-10 h-10 text-white" />
+                <Mic className="w-10 h-10 text-white" />
               )}
             </button>
           </div>
@@ -111,13 +111,13 @@ export default function VoiceInput({ onActionConfirmed }: VoiceInputProps) {
                 onClick={() => setPrediction(null)}
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-white/5 hover:bg-white/10 text-slate-300 rounded-2xl border border-white/10 transition-all"
               >
-                <XMarkIcon className="w-5 h-5" /> Cancel
+                <X className="w-5 h-5" /> Cancel
               </button>
               <button
                 onClick={handleConfirm}
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-bold transition-all shadow-lg shadow-emerald-500/20"
               >
-                <CheckIcon className="w-5 h-5" /> Confirm
+                <Check className="w-5 h-5" /> Confirm
               </button>
             </div>
           </div>
@@ -125,7 +125,7 @@ export default function VoiceInput({ onActionConfirmed }: VoiceInputProps) {
         
         {processing && (
           <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center rounded-3xl">
-            <ArrowPathIcon className="w-8 h-8 text-emerald-400 animate-spin" />
+            <RefreshCw className="w-8 h-8 text-emerald-400 animate-spin" />
           </div>
         )}
       </div>
