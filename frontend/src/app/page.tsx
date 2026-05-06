@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import { ChevronRight, Leaf, ShieldCheck, BarChart3, Languages, ArrowRight, Play, CheckCircle2, Menu, X } from 'lucide-react';
 import { translations, Language } from '@/lib/translations';
+import Image from 'next/image';
 import { HolsteinBackground } from '@/components/ui/HolsteinBackground';
 
 export default function LandingPage() {
@@ -17,14 +18,20 @@ export default function LandingPage() {
   const toggleLang = () => setLang(prev => prev === 'en' ? 'ml' : 'en');
 
   return (
-    <div className="relative min-h-screen font-sans selection:bg-grass-green selection:text-white overflow-x-hidden">
+    <div className="relative min-h-screen font-sans selection:bg-grass-green selection:text-white overflow-x-hidden text-patch-black">
       <HolsteinBackground />
 
       {/* Glass Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 px-4 md:px-8 py-4">
         <div className="max-w-7xl mx-auto flex justify-between items-center bg-white/60 backdrop-blur-xl border border-white/20 px-6 md:px-8 py-3 md:py-4 rounded-[24px] shadow-premium">
           <div className="flex items-center gap-3 text-xl md:text-2xl font-black tracking-tighter">
-            <div className="w-8 h-8 md:w-10 md:h-10 bg-patch-black rounded-xl flex items-center justify-center text-white shadow-lg">C</div>
+            <Image 
+              src="/image.png" 
+              alt="CattleOS Logo" 
+              width={40} 
+              height={40} 
+              className="rounded-xl shadow-lg"
+            />
             CattleOS
           </div>
           
@@ -80,55 +87,106 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative pt-32 md:pt-44 pb-20 md:pb-32 px-6 md:px-8 max-w-7xl mx-auto flex flex-col items-center text-center">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-grass-green/10 text-grass-green border border-grass-green/20 mb-8 font-bold text-[10px] md:text-xs uppercase tracking-widest"
-        >
-          <span className="w-2 h-2 rounded-full bg-grass-green animate-pulse"></span>
-          Trusted by Dairy Farmers across Kerala
-        </motion.div>
+      <section className="relative pt-32 md:pt-48 pb-20 md:pb-40 px-6 md:px-8 max-w-7xl mx-auto">
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-16 md:gap-24">
+          
+          {/* Left Content */}
+          <div className="flex-1 text-center lg:text-left">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-grass-green/10 text-grass-green border border-grass-green/20 mb-8 font-bold text-[10px] md:text-xs uppercase tracking-widest"
+            >
+              <span className="w-2 h-2 rounded-full bg-grass-green animate-pulse"></span>
+              Trusted by Dairy Farmers across Kerala
+            </motion.div>
 
-        <motion.h1 
-          style={{ opacity }}
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          className="text-4xl sm:text-5xl md:text-8xl font-black leading-[1.1] md:leading-[1.05] tracking-tight mb-8 md:mb-10 max-w-5xl"
-        >
-          {lang === 'en' ? (
-            <>Precision Farming for the <span className="text-grass-green">Modern Herd.</span></>
-          ) : (
-            t.heroTitle
-          )}
-        </motion.h1>
+            <motion.h1 
+              style={{ opacity }}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+              className="text-4xl sm:text-6xl md:text-8xl font-black leading-[1.1] tracking-tight mb-8"
+            >
+              {lang === 'en' ? (
+                <>Precision Farming for the <span className="text-grass-green">Modern Herd.</span></>
+              ) : (
+                t.heroTitle
+              )}
+            </motion.h1>
 
-        <motion.p 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="text-lg md:text-2xl text-black/50 max-w-3xl mb-10 md:mb-12 font-medium leading-relaxed"
-        >
-          {t.heroSub}
-        </motion.p>
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="text-lg md:text-2xl text-black/70 max-w-2xl mb-10 md:mb-12 font-medium leading-relaxed"
+            >
+              {t.heroSub}
+            </motion.p>
 
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          className="flex flex-col sm:flex-row gap-4 md:gap-6 w-full sm:w-auto"
-        >
-          <button className="group bg-patch-black text-white px-8 md:px-10 py-4 md:py-5 rounded-[20px] md:rounded-[24px] text-base md:text-lg font-black flex items-center justify-center gap-3 hover:scale-105 transition-all shadow-2xl">
-            {t.getStarted} <ArrowRight className="group-hover:translate-x-1 transition-transform" />
-          </button>
-          <button className="group bg-white border border-black/10 px-8 md:px-10 py-4 md:py-5 rounded-[20px] md:rounded-[24px] text-base md:text-lg font-black flex items-center justify-center gap-3 hover:bg-black/5 transition-all">
-            <div className="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Play size={16} fill="black" />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              className="flex flex-col sm:flex-row gap-4 md:gap-6 w-full sm:w-auto justify-center lg:justify-start"
+            >
+              <a href="/login" className="group bg-patch-black text-white px-8 md:px-10 py-4 md:py-5 rounded-[20px] md:rounded-[24px] text-base md:text-lg font-black flex items-center justify-center gap-3 hover:scale-105 transition-all shadow-2xl">
+                {t.getStarted} <ArrowRight className="group-hover:translate-x-1 transition-transform" />
+              </a>
+              <button className="group bg-white border border-black/10 px-8 md:px-10 py-4 md:py-5 rounded-[20px] md:rounded-[24px] text-base md:text-lg font-black flex items-center justify-center gap-3 hover:bg-black/5 transition-all">
+                <div className="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Play size={16} fill="black" />
+                </div>
+                Watch Tour
+              </button>
+            </motion.div>
+          </div>
+
+          {/* Right Visual - Massive Logo on Black Card */}
+          <motion.div
+            initial={{ opacity: 0, x: 50, scale: 0.8 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+            className="flex-1 relative flex items-center justify-center"
+          >
+            <div className="relative w-[320px] h-[320px] md:w-[600px] md:h-[600px] bg-patch-black rounded-[60px] md:rounded-[120px] flex items-center justify-center shadow-[0_64px_128px_-20px_rgba(0,0,0,0.6)] overflow-hidden group">
+              {/* Animated Glow */}
+              <div className="absolute inset-0 bg-gradient-to-tr from-grass-green/20 to-transparent opacity-50 group-hover:scale-150 transition-transform duration-1000"></div>
+              
+              <Image 
+                src="/image.png" 
+                alt="CattleOS Premium Branding" 
+                width={500} 
+                height={500} 
+                className="relative z-10 w-56 h-56 md:w-96 md:h-96 rounded-[40px] md:rounded-[80px] shadow-2xl transition-all duration-700 group-hover:scale-110 group-hover:rotate-3"
+                priority
+              />
+              
+              {/* Tech Accents */}
+              <div className="absolute bottom-8 right-8 text-white/10 font-black italic tracking-widest text-xl select-none">
+                CATTLEOS v2.0
+              </div>
             </div>
-            Watch Tour
-          </button>
-        </motion.div>
+
+            {/* Floating Stats Ornaments */}
+            <motion.div 
+              animate={{ y: [0, -20, 0] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute -top-10 -right-4 bg-white/80 backdrop-blur-xl p-6 rounded-3xl shadow-2xl border border-white/50 hidden md:block"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-grass-green rounded-2xl flex items-center justify-center text-white">
+                  <BarChart3 size={24} />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black uppercase text-black/40">Efficiency</p>
+                  <p className="text-xl font-black">+42%</p>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+
+        </div>
       </section>
 
       {/* Cinematic Preview */}
@@ -173,11 +231,11 @@ export default function LandingPage() {
                 <feature.icon size={30} />
               </div>
               <h3 className="text-xl md:text-2xl font-black mb-4">{feature.title}</h3>
-              <p className="text-black/40 font-medium leading-relaxed text-sm md:text-base">
+              <p className="text-black/60 font-medium leading-relaxed text-sm md:text-base">
                 {feature.desc}
               </p>
               <div className="mt-6 md:mt-8 pt-6 md:pt-8 border-t border-black/5 flex items-center justify-between">
-                 <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-black/20 group-hover:text-grass-green transition-colors">Learn More</span>
+                 <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-black/40 group-hover:text-grass-green transition-colors">Learn More</span>
                  <ArrowRight size={16} className="text-black/10 group-hover:text-grass-green transition-colors" />
               </div>
             </motion.div>
@@ -230,7 +288,7 @@ export default function LandingPage() {
             <div className="w-8 h-8 bg-patch-black rounded-lg flex items-center justify-center text-white text-xs shadow-lg">C</div>
             CattleOS
         </div>
-        <p className="text-black/30 text-[10px] md:text-sm font-bold uppercase tracking-widest max-w-md mx-auto">
+        <p className="text-black/60 text-[10px] md:text-sm font-bold uppercase tracking-widest max-w-md mx-auto">
           © 2026 CattleOS — Empowering the next generation of Dairy Farmers.
         </p>
       </footer>

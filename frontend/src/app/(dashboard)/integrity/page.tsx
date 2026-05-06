@@ -11,6 +11,8 @@ import {
   Search,
   RotateCcw
 } from 'lucide-react';
+import { useAuthStore } from '@/store/authStore';
+import { translations, Language } from '@/lib/translations';
 
 // Mock data for the dashboard
 const mockStats = {
@@ -31,6 +33,10 @@ import { Button, Input, Skeleton } from '@/components/ui/core';
 
 export default function IntegrityDashboard() {
   const [loading, setLoading] = useState(true);
+  const { user } = useAuthStore();
+  
+  const lang = (user?.language || 'en') as Language;
+  const t = translations[lang] || translations.en;
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 1500);
@@ -64,43 +70,43 @@ export default function IntegrityDashboard() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-cyan-400">
-            Data Integrity
+            {t.integrity.title}
           </h1>
-          <p className="text-slate-400 mt-1">Real-time correctness monitoring.</p>
+          <p className="text-slate-400 mt-1">{t.integrity.sub}</p>
         </div>
         <Button 
           onClick={runReconciliation}
           leftIcon={<RefreshCcw className="w-5 h-5" />}
         >
-          Run Reconciliation
+          {t.integrity.reconcile}
         </Button>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard 
-          title="System Health Score" 
+          title={t.integrity.stats.health} 
           value={`${mockStats.healthScore}%`} 
           icon={<ShieldCheck className="w-8 h-8 text-emerald-400" />}
           trend="+0.2% from yesterday"
           color="emerald"
         />
         <StatCard 
-          title="Open Anomalies" 
+          title={t.integrity.stats.anomalies} 
           value={mockStats.openAnomalies} 
           icon={<AlertTriangle className="w-8 h-8 text-amber-400" />}
           trend="Action required"
           color="amber"
         />
         <StatCard 
-          title="Last Sync Status" 
+          title={t.integrity.stats.sync} 
           value="Synchronized" 
           icon={<CheckCircle2 className="w-8 h-8 text-cyan-400" />}
           trend={mockStats.lastCheck}
           color="cyan"
         />
         <StatCard 
-          title="Records Verified" 
+          title={t.integrity.stats.verified} 
           value={mockStats.totalProcessed} 
           icon={<History className="w-8 h-8 text-purple-400" />}
           trend="Deterministic Audit Trail"
@@ -129,18 +135,18 @@ export default function IntegrityDashboard() {
                       <div className={`mt-1 w-2 h-2 rounded-full ${anomaly.severity === 'HIGH' ? 'bg-red-500 animate-pulse' : 'bg-amber-500'}`} />
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-bold text-slate-300 uppercase tracking-wider">{anomaly.type}</span>
-                          <span className="text-xs text-slate-500">• {anomaly.domain}</span>
+                          <span className="text-sm font-bold text-slate-200 uppercase tracking-wider">{anomaly.type}</span>
+                          <span className="text-xs text-slate-400">• {anomaly.domain}</span>
                         </div>
                         <p className="text-slate-100 font-medium mt-1">{anomaly.description}</p>
-                        <p className="text-xs text-slate-500 mt-2">{anomaly.date}</p>
+                        <p className="text-xs text-slate-400 mt-2">{anomaly.date}</p>
                       </div>
                     </div>
                     <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button className="px-3 py-1.5 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20 hover:bg-emerald-500/20">
                         Repair
                       </button>
-                      <button className="px-3 py-1.5 bg-white/5 text-slate-400 text-xs font-bold rounded-lg border border-white/10 hover:bg-white/10">
+                      <button className="px-3 py-1.5 bg-white/10 text-slate-300 text-xs font-bold rounded-lg border border-white/10 hover:bg-white/20">
                         Ignore
                       </button>
                     </div>
@@ -184,7 +190,7 @@ export default function IntegrityDashboard() {
                 status="success" 
               />
             </div>
-            <button className="w-full mt-8 py-3 text-sm font-medium text-slate-400 hover:text-white border border-white/5 hover:border-white/10 rounded-xl transition-all">
+            <button className="w-full mt-8 py-3 text-sm font-medium text-slate-300 hover:text-white border border-white/10 hover:border-white/20 rounded-xl transition-all">
               View Full Audit Trail
             </button>
           </div>
@@ -202,7 +208,7 @@ function StatCard({ title, value, icon, trend, color }: any) {
           {icon}
         </div>
       </div>
-      <h3 className="text-slate-400 text-sm font-medium">{title}</h3>
+      <h3 className="text-slate-300 text-sm font-medium">{title}</h3>
       <div className="text-3xl font-bold mt-1 text-white">{value}</div>
       <div className={`text-xs mt-2 font-medium ${color === 'emerald' ? 'text-emerald-400' : color === 'amber' ? 'text-amber-400' : 'text-slate-500'}`}>
         {trend}
@@ -219,8 +225,8 @@ function AuditItem({ action, detail, time, status }: any) {
       </div>
       <div>
         <div className="flex items-center gap-2">
-          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{action}</span>
-          <span className="text-[10px] text-slate-600 tracking-wider">• {time}</span>
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{action}</span>
+          <span className="text-[10px] text-slate-500 tracking-wider">• {time}</span>
         </div>
         <p className="text-xs text-slate-300 mt-1 leading-relaxed">{detail}</p>
       </div>

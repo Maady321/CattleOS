@@ -73,3 +73,40 @@ body {
   animation: swing 2s ease infinite;
   transform-origin: top center;
 }
+
+/* 
+  ELITE ACCESSIBILITY: Auto-Contrast for Light Backgrounds
+  Ensures that any element with a white or light background (bg-white, glass)
+  defaults to dark text, preventing "invisible" text due to global white text inheritance.
+*/
+.bg-white,
+.bg-white\/90,
+.bg-white\/60,
+.bg-white\/50,
+.glass {
+  color: #000000 !important;
+}
+
+/* Ensure hover states also flip text color if the background becomes white */
+.hover\:bg-white:hover {
+  color: #000000 !important;
+}
+
+/* Inherit dark color for child elements in light containers unless specifically overridden */
+.bg-white p, 
+.bg-white h1, 
+.bg-white h2, 
+.bg-white h3, 
+.bg-white h4, 
+.bg-white span,
+.glass p, 
+.glass span {
+  color: inherit;
+}
+
+/* Maintain metadata visibility (light gray on white) */
+.bg-white .text-black\/30,
+.bg-white .text-slate-500,
+.bg-white .text-black\/40 {
+  color: rgba(0, 0, 0, 0.6) !important;
+}

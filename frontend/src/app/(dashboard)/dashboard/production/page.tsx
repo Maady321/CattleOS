@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useCattleStore } from '@/store/cattleStore';
+import { useAuthStore } from '@/store/authStore';
+import { translations, Language } from '@/lib/translations';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Milk, BarChart3, TrendingUp, DollarSign, Plus, Download, Calendar, Filter, ChevronRight, Droplets, X, Clock } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
@@ -13,6 +15,10 @@ import autoTable from 'jspdf-autotable';
 
 export default function ProductionPage() {
   const { cattle, productionLogs, addProductionLog, hasHydrated } = useCattleStore();
+  const { user } = useAuthStore();
+  
+  const lang = (user?.language || 'en') as Language;
+  const t = translations[lang] || translations.en;
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isQualityModalOpen, setIsQualityModalOpen] = useState(false);
@@ -25,12 +31,68 @@ export default function ProductionPage() {
     setIsMounted(true);
   }, []);
   const [bulkLabData, setBulkLabData] = useState({
-    fat: '0.0',
-    protein: '0.0',
-    purity: '0.0',
-    snf: '0.0',
-    lactose: '0.0'
+    fat: '4.1',
+    protein: '3.4',
+    purity: '99.8',
+    snf: '8.7',
+    lactose: '4.8'
   });
+
+  const qualityReport = React.useMemo(() => {
+    const fat = parseFloat(bulkLabData.fat);
+    const snf = parseFloat(bulkLabData.snf);
+    const protein = parseFloat(bulkLabData.protein);
+    const purity = parseFloat(bulkLabData.purity);
+
+    const scores = {
+      fat: fat >= 4.2 ? 20 : fat >= 3.5 ? 15 : 10,
+      snf: snf >= 8.5 ? 20 : snf >= 8.0 ? 15 : 10,
+      protein: protein >= 3.2 ? 20 : protein >= 3.0 ? 15 : 10,
+      purity: purity >= 99.0 ? 20 : purity >= 97.0 ? 15 : 10,
+      lactose: 20
+    };
+
+    const totalScore = Object.values(scores).reduce((a, b) => a + b, 0);
+    
+    let grade = 'D-Grade';
+    let color = 'text-red-500';
+    let bgColor = 'bg-red-500';
+    let gradient = 'from-red-500/20';
+    let borderColor = 'border-red-500/20';
+
+    if (totalScore >= 90) {
+      grade = 'A-Grade';
+      color = 'text-grass-green';
+      bgColor = 'bg-grass-green';
+      gradient = 'from-grass-green/20';
+      borderColor = 'border-grass-green/20';
+    } else if (totalScore >= 75) {
+      grade = 'B-Grade';
+      color = 'text-blue-500';
+      bgColor = 'bg-blue-500';
+      gradient = 'from-blue-500/20';
+      borderColor = 'border-blue-500/20';
+    } else if (totalScore >= 60) {
+      grade = 'C-Grade';
+      color = 'text-amber-500';
+      bgColor = 'bg-amber-500';
+      gradient = 'from-amber-500/20';
+      borderColor = 'border-amber-500/20';
+    }
+
+    return {
+      score: totalScore,
+      grade,
+      certified: totalScore >= 75, // Certified if A or B
+      ui: { color, bgColor, gradient, borderColor },
+      metrics: {
+        fat: { status: fat >= 4.2 ? 'Excellent' : fat >= 3.5 ? 'Optimal' : 'Low', color: fat >= 3.5 ? 'text-grass-green' : 'text-red-500' },
+        snf: { status: snf >= 8.5 ? 'Excellent' : snf >= 8.0 ? 'Optimal' : 'Inconsistent', color: snf >= 8.0 ? 'text-blue-400' : 'text-amber-500' },
+        protein: { status: protein >= 3.2 ? 'High' : protein >= 3.0 ? 'Standard' : 'Low', color: protein >= 3.0 ? 'text-purple-400' : 'text-red-500' },
+        purity: { status: purity >= 99.0 ? 'Superior' : purity >= 97.0 ? 'Good' : 'Critical', color: purity >= 97.0 ? 'text-grass-green' : 'text-red-500' }
+      }
+    };
+  }, [bulkLabData]);
 
   const chartData = React.useMemo(() => {
     const limit = timeRange === '7D' ? 7 : timeRange === '30D' ? 30 : 180;
@@ -127,13 +189,13 @@ export default function ProductionPage() {
       startY: 65,
       head: [['Parameter', 'Measured Value', 'Reference Range', 'Status']],
       body: [
-        ['Milk Fat Content', '4.1%', '3.5% - 4.5%', 'Optimal'],
-        ['SNF (Solid Not Fat)', '8.7%', '8.0% - 9.0%', 'Excellent'],
-        ['Protein Level', '3.4%', '3.0% - 3.8%', 'High'],
-        ['Lactose Level', '4.8%', '4.5% - 5.0%', 'Stable'],
-        ['Purity Score', '99.8%', '> 98.0%', 'Superior']
+        ['Milk Fat Content', `${bulkLabData.fat}%`, '4.2% - 4.5%', qualityReport.metrics.fat.status],
+        ['SNF (Solid Not Fat)', `${bulkLabData.snf}%`, '8.5% - 9.0%', qualityReport.metrics.snf.status],
+        ['Protein Level', `${bulkLabData.protein}%`, '3.2% - 3.8%', qualityReport.metrics.protein.status],
+        ['Lactose Level', `${bulkLabData.lactose}%`, '4.5% - 5.0%', 'Stable'],
+        ['Purity Score', `${bulkLabData.purity}%`, '> 99.0%', qualityReport.metrics.purity.status]
       ],
-      headStyles: { fillColor: [46, 204, 113] },
+      headStyles: { fillColor: qualityReport.score >= 90 ? [46, 204, 113] : qualityReport.score >= 75 ? [52, 152, 219] : qualityReport.score >= 60 ? [243, 156, 18] : [231, 76, 60] },
       theme: 'grid'
     });
     
@@ -145,11 +207,18 @@ export default function ProductionPage() {
     
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(11);
-    doc.text('This is to certify that the dairy samples analyzed consistently meet the A-Grade', 20, finalY + 30);
-    doc.text('standards for commercial distribution and premium quality labeling.', 20, finalY + 37);
+    const certText = qualityReport.certified 
+      ? `This is to certify that the dairy samples analyzed consistently meet the ${qualityReport.grade}`
+      : `This report indicates that the dairy samples analyzed currently meet ${qualityReport.grade} standards.`;
+    const certSubText = qualityReport.certified
+      ? 'standards for commercial distribution and premium quality labeling.'
+      : 'Review of nutrition and hygiene protocols is recommended to reach A-Grade certification.';
+    
+    doc.text(certText, 20, finalY + 30);
+    doc.text(certSubText, 20, finalY + 37);
     
     doc.setFont('helvetica', 'bold');
-    doc.text('Quality Score: 98/100', 20, finalY + 50);
+    doc.text(`Quality Score: ${qualityReport.score}/100`, 20, finalY + 50);
     
     // Footer
     doc.setFontSize(9);
@@ -187,33 +256,33 @@ export default function ProductionPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
         <div>
-          <h1 className="text-4xl font-black tracking-tight mb-2">Milk Production</h1>
-          <p className="text-black/40 font-medium">Track daily yields, quality metrics, and revenue growth.</p>
+          <h1 className="text-4xl font-black tracking-tight mb-2">{t.production.title}</h1>
+          <p className="text-black/40 font-medium">{t.production.sub}</p>
         </div>
         <div className="flex gap-4">
           <button 
             onClick={() => exportToCSV(productionLogs)}
-            className="bg-white border border-black/5 px-6 py-4 rounded-2xl font-black flex items-center gap-3 hover:bg-black/5 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-white text-black border border-black/5 px-6 py-4 rounded-2xl font-black flex items-center gap-3 hover:bg-black/5 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={productionLogs.length === 0}
           >
-            <Download size={20} /> Export Report
+            <Download size={20} /> {t.production.export}
           </button>
           <button 
             onClick={() => setIsModalOpen(true)}
             className="bg-patch-black text-white px-8 py-4 rounded-2xl font-black flex items-center gap-3 hover:scale-105 active:scale-95 transition-all shadow-xl"
           >
-            <Plus size={20} /> Log Production
+            <Plus size={20} /> {t.production.logProduction}
           </button>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-12">
         {[
-          { label: "Today's Yield", value: `${productionLogs.filter(l => l.date === new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })).reduce((acc, l) => acc + parseFloat(l.yield || '0'), 0).toFixed(1)}L`, icon: Droplets, color: 'text-white', bg: 'bg-grass-green', shadow: 'shadow-green-200', trend: 'Live' },
-          { label: 'Weekly Average', value: `${(productionLogs.reduce((acc, l) => acc + parseFloat(l.yield || '0'), 0) / Math.max(1, productionLogs.length / 2)).toFixed(1)}L`, icon: TrendingUp, color: 'text-white', bg: 'bg-emerald-600', shadow: 'shadow-emerald-200', trend: '+0%' },
-          { label: 'Estimated Revenue', value: `₹${(productionLogs.reduce((acc, l) => acc + parseFloat(l.yield || '0'), 0) * 45).toLocaleString()}`, icon: DollarSign, color: 'text-white', bg: 'bg-patch-black', shadow: 'shadow-gray-200', trend: '+0%' },
-          { label: 'Avg Fat Content', value: `${(productionLogs.reduce((acc, l) => acc + parseFloat(l.fat || '0'), 0) / Math.max(1, productionLogs.length)).toFixed(2)}%`, icon: Milk, color: 'text-white', bg: 'bg-green-700', shadow: 'shadow-green-300', trend: 'Stable' },
+          { label: t.production.stats.todayYield, value: `${productionLogs.filter(l => l.date === new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })).reduce((acc, l) => acc + parseFloat(l.yield || '0'), 0).toFixed(1)}L`, icon: Droplets, color: 'text-white', bg: 'bg-grass-green', shadow: 'shadow-green-200', trend: 'Live' },
+          { label: t.production.stats.weeklyAvg, value: `${(productionLogs.reduce((acc, l) => acc + parseFloat(l.yield || '0'), 0) / Math.max(1, productionLogs.length / 2)).toFixed(1)}L`, icon: TrendingUp, color: 'text-white', bg: 'bg-emerald-600', shadow: 'shadow-emerald-200', trend: '+0%' },
+          { label: t.production.stats.revenue, value: `₹${(productionLogs.reduce((acc, l) => acc + parseFloat(l.yield || '0'), 0) * 45).toLocaleString()}`, icon: DollarSign, color: 'text-white', bg: 'bg-patch-black', shadow: 'shadow-gray-200', trend: '+0%' },
+          { label: t.production.stats.avgFat, value: `${(productionLogs.reduce((acc, l) => acc + parseFloat(l.fat || '0'), 0) / Math.max(1, productionLogs.length)).toFixed(2)}%`, icon: Milk, color: 'text-white', bg: 'bg-green-700', shadow: 'shadow-green-300', trend: 'Stable' },
         ].map((stat, i) => (
           <motion.div 
             key={i}
@@ -231,7 +300,7 @@ export default function ProductionPage() {
                 {stat.trend}
               </span>
             </div>
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-black/30 mb-2">{stat.label}</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-black/60 mb-2">{stat.label}</p>
             <h3 className="text-3xl font-black tracking-tighter text-patch-black">{stat.value}</h3>
           </motion.div>
         ))}
@@ -241,13 +310,13 @@ export default function ProductionPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
         <div className="lg:col-span-2 bg-white p-10 rounded-[40px] border border-black/5 shadow-premium">
           <div className="flex justify-between items-center mb-10">
-            <h3 className="text-2xl font-black tracking-tight">Yield Overview</h3>
+            <h3 className="text-2xl font-black tracking-tight">{t.production.yieldOverview}</h3>
             <div className="flex gap-2 p-1 bg-black/5 rounded-xl">
               {['7D', '30D', '6M'].map((p) => (
                 <button 
                   key={p} 
                   onClick={() => setTimeRange(p)}
-                  className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${timeRange === p ? 'bg-white shadow-sm' : 'text-black/40'}`}
+                  className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${timeRange === p ? 'bg-white text-black shadow-sm' : 'text-black/40'}`}
                 >
                   {p}
                 </button>
@@ -297,7 +366,7 @@ export default function ProductionPage() {
           <div className="absolute top-0 right-0 w-64 h-64 bg-grass-green/20 blur-[100px]"></div>
           <div className="relative z-10">
             <div className="flex items-center gap-3 text-grass-green font-black text-xs uppercase tracking-[0.2em] mb-8">
-              <Milk size={18} /> Quality Analysis
+              <Milk size={18} /> {t.production.qualityAnalysis}
             </div>
             <h3 className="text-3xl font-black mb-6 leading-tight">Your herd&apos;s milk quality is in the top 5%.</h3>
             <p className="text-white/40 font-medium mb-12">Based on fat content and purity tests from the last 30 days.</p>
@@ -355,21 +424,21 @@ export default function ProductionPage() {
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, scale: 0.95 }}
                       onClick={() => setSelectedLog(log)}
-                      className="flex items-center justify-between p-6 bg-black/[0.02] rounded-[32px] border border-black/5 hover:bg-white hover:shadow-premium transition-all group cursor-pointer"
+                      className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 bg-black/[0.02] rounded-[32px] border border-black/5 hover:bg-white hover:shadow-premium transition-all group cursor-pointer gap-4"
                     >
                        <div className="flex items-center gap-5">
-                          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-lg ${
+                          <div className={`w-14 h-14 shrink-0 rounded-2xl flex items-center justify-center text-white shadow-lg ${
                              log.session === 'Morning' ? 'bg-orange-400' : 
                              log.session === 'Afternoon' ? 'bg-yellow-500' : 'bg-patch-black'
                           }`}>
                              <Droplets size={22} />
                           </div>
-                          <div>
-                             <p className="text-xl font-black tracking-tight">{log.cow.split(' ')[0]} • {log.yield} Liters</p>
+                          <div className="min-w-0">
+                             <p className="text-xl font-black tracking-tight group-hover:text-black transition-colors truncate">{log.cow.split(' ')[0]} • {log.yield} Liters</p>
                              <div className="flex items-center gap-3 mt-1">
-                                <span className="text-[10px] font-black uppercase tracking-widest text-black/30">{log.session}</span>
+                                <span className="text-[10px] font-black uppercase tracking-widest text-black/60 group-hover:text-black/70 transition-colors">{log.session}</span>
                                 <span className="w-1 h-1 bg-black/10 rounded-full"></span>
-                                <span className="text-[10px] font-black uppercase tracking-widest text-black/30">{log.timestamp}</span>
+                                <span className="text-[10px] font-black uppercase tracking-widest text-black/60 group-hover:text-black/70 transition-colors">{log.timestamp}</span>
                              </div>
                           </div>
                        </div>
@@ -445,7 +514,7 @@ export default function ProductionPage() {
               className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-white z-[101] shadow-2xl p-10 overflow-y-auto"
             >
               <div className="flex justify-between items-center mb-8">
-                 <h2 className="text-3xl font-black">Log Production</h2>
+                 <h2 className="text-3xl font-black">{t.production.logModal.title}</h2>
                  <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-black/5 rounded-full transition-colors text-black/20 hover:text-black">
                     <X size={24} />
                  </button>
@@ -453,7 +522,7 @@ export default function ProductionPage() {
 
               <form onSubmit={handleAddLog} className="space-y-8">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-black/30 ml-1">Select Animal</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-black/60 ml-1">{t.production.logModal.selectAnimal}</label>
                   <select 
                     value={newLog.cow}
                     onChange={(e) => setNewLog({...newLog, cow: e.target.value})}
@@ -466,7 +535,7 @@ export default function ProductionPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-black/30 ml-1">Daily Yield (Liters)</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-black/60 ml-1">{t.production.logModal.yieldLabel}</label>
                   <div className="relative">
                      <input 
                        required
@@ -482,7 +551,7 @@ export default function ProductionPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-black/30 ml-1">Milking Session</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-black/30 ml-1">{t.production.logModal.session}</label>
                   <div className="grid grid-cols-3 gap-3">
                     {['Morning', 'Afternoon', 'Evening'].map((s) => (
                       <button
@@ -501,7 +570,7 @@ export default function ProductionPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                    <div className="space-y-2">
-                     <label className="text-[10px] font-black uppercase tracking-widest text-black/30 ml-1">Fat %</label>
+                     <label className="text-[10px] font-black uppercase tracking-widest text-black/30 ml-1">{t.production.logModal.fat}</label>
                      <input 
                        type="number"
                        step="0.1"
@@ -511,7 +580,7 @@ export default function ProductionPage() {
                      />
                    </div>
                    <div className="space-y-2">
-                     <label className="text-[10px] font-black uppercase tracking-widest text-black/30 ml-1">SNF Content</label>
+                     <label className="text-[10px] font-black uppercase tracking-widest text-black/30 ml-1">{t.production.logModal.snf}</label>
                      <input 
                        type="number"
                        step="0.1"
@@ -524,7 +593,7 @@ export default function ProductionPage() {
 
                 <div className="pt-6">
                    <button type="submit" className="w-full py-5 bg-patch-black text-white rounded-[24px] font-black shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3">
-                      <Droplets size={20} /> Save Yield Record
+                      <Droplets size={20} /> {t.production.logModal.save}
                    </button>
                 </div>
               </form>
@@ -567,7 +636,7 @@ export default function ProductionPage() {
                     <Droplets size={32} />
                   </div>
                   <div>
-                    <h2 className="text-3xl font-black tracking-tight">{selectedLog.session} Yield Report</h2>
+                    <h2 className="text-3xl font-black tracking-tight text-black">{selectedLog.session} Yield Report</h2>
                     <p className="text-black/30 font-bold uppercase tracking-widest text-sm">{selectedLog.date} • {selectedLog.timestamp}</p>
                   </div>
                 </div>
@@ -579,7 +648,7 @@ export default function ProductionPage() {
                    </div>
                    <div className="p-8 bg-black/[0.02] rounded-[32px] border border-black/5">
                       <p className="text-[10px] font-black uppercase tracking-[0.2em] text-black/30 mb-2">Animal Identity</p>
-                      <p className="text-xl font-black">{selectedLog.cow}</p>
+                      <p className="text-xl font-black text-black">{selectedLog.cow}</p>
                    </div>
                 </div>
 
@@ -590,7 +659,7 @@ export default function ProductionPage() {
                       </div>
                       <div>
                          <p className="text-[10px] font-black uppercase text-black/30">Fat Content</p>
-                         <p className="font-black text-lg">{selectedLog.fat}%</p>
+                         <p className="font-black text-lg text-black">{selectedLog.fat}%</p>
                       </div>
                    </div>
                    <div className="flex items-center gap-4 p-6 bg-white rounded-3xl border border-black/5 shadow-sm">
@@ -599,7 +668,7 @@ export default function ProductionPage() {
                       </div>
                       <div>
                          <p className="text-[10px] font-black uppercase text-black/30">SNF Content</p>
-                         <p className="font-black text-lg">{selectedLog.snf}</p>
+                         <p className="font-black text-lg text-black">{selectedLog.snf}</p>
                       </div>
                    </div>
                 </div>
@@ -684,46 +753,52 @@ export default function ProductionPage() {
 
                 {/* Laboratory Metrics */}
                 <div className="grid grid-cols-2 gap-6">
-                   {[
-                     { label: 'SNF (Solid Not Fat)', value: '8.7', unit: '%', status: 'Optimal', color: 'text-blue-400' },
-                     { label: 'Protein Content', value: '3.4', unit: '%', status: 'High', color: 'text-purple-400' },
-                     { label: 'Lactose Level', value: '4.8', unit: '%', status: 'Stable', color: 'text-orange-400' },
-                     { label: 'Purity Score', value: '99.8', unit: '%', status: 'Excellent', color: 'text-grass-green' },
-                   ].map((metric, i) => (
-                     <div key={i} className="bg-white/5 p-6 rounded-[32px] border border-white/10">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-white/30 mb-2">{metric.label}</p>
-                        <div className="flex items-baseline gap-1 mb-4">
-                           <span className="text-3xl font-black">{metric.value}</span>
-                           <span className="text-sm font-bold text-white/20">{metric.unit}</span>
-                        </div>
-                        <span className={`text-[10px] font-black uppercase px-3 py-1 rounded-full bg-white/5 ${metric.color}`}>
-                           {metric.status}
-                        </span>
-                     </div>
-                   ))}
-                </div>
+                    {[
+                      { label: 'SNF (Solid Not Fat)', value: bulkLabData.snf, unit: '%', status: qualityReport.metrics.snf.status, color: qualityReport.metrics.snf.color },
+                      { label: 'Protein Content', value: bulkLabData.protein, unit: '%', status: qualityReport.metrics.protein.status, color: qualityReport.metrics.protein.color },
+                      { label: 'Lactose Level', value: bulkLabData.lactose, unit: '%', status: 'Stable', color: 'text-orange-400' },
+                      { label: 'Purity Score', value: bulkLabData.purity, unit: '%', status: qualityReport.metrics.purity.status, color: qualityReport.metrics.purity.color },
+                    ].map((metric, i) => (
+                      <div key={i} className="bg-white/5 p-6 rounded-[32px] border border-white/10">
+                         <p className="text-[10px] font-black uppercase tracking-widest text-white/30 mb-2">{metric.label}</p>
+                         <div className="flex items-baseline gap-1 mb-4">
+                            <span className="text-3xl font-black">{metric.value}</span>
+                            <span className="text-sm font-bold text-white/20">{metric.unit}</span>
+                         </div>
+                         <span className={`text-[10px] font-black uppercase px-3 py-1 rounded-full bg-white/5 ${metric.color}`}>
+                            {metric.status}
+                         </span>
+                      </div>
+                    ))}
+                 </div>
 
-                {/* Comparison Card */}
-                <div className="bg-gradient-to-br from-grass-green/20 to-transparent rounded-[40px] p-10 border border-grass-green/20">
-                   <div className="flex items-center gap-4 mb-6">
-                      <div className="w-12 h-12 bg-grass-green rounded-2xl flex items-center justify-center text-patch-black">
-                         <TrendingUp size={24} />
-                      </div>
-                      <h4 className="text-2xl font-black">A-Grade Certification</h4>
-                   </div>
-                   <p className="text-white/60 font-medium leading-relaxed mb-8">
-                      Your current production metrics exceed the A-Grade certification requirements set by the Dairy Development Board. Keep up the consistent nutrition plan!
-                   </p>
-                   <div className="space-y-4">
-                      <div className="flex justify-between items-center text-sm">
-                         <span className="text-white/40 font-bold uppercase tracking-widest">Quality Score</span>
-                         <span className="font-black">98/100</span>
-                      </div>
-                      <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
-                         <div className="w-[98%] h-full bg-grass-green"></div>
-                      </div>
-                   </div>
-                </div>
+                 {/* Comparison Card */}
+                 <div className={`bg-gradient-to-br ${qualityReport.ui.gradient} to-transparent rounded-[40px] p-10 border ${qualityReport.ui.borderColor}`}>
+                    <div className="flex items-center gap-4 mb-6">
+                       <div className={`w-12 h-12 ${qualityReport.ui.bgColor} rounded-2xl flex items-center justify-center text-patch-black`}>
+                          <TrendingUp size={24} />
+                       </div>
+                       <h4 className="text-2xl font-black">{qualityReport.grade} Certification</h4>
+                    </div>
+                    <p className="text-white/60 font-medium leading-relaxed mb-8">
+                       {qualityReport.score >= 90 
+                         ? 'Outstanding quality. Your current production metrics exceed the A-Grade certification requirements.'
+                         : qualityReport.score >= 75
+                         ? 'Good quality. You have met B-Grade standards. Minor nutrition adjustments could reach A-Grade.'
+                         : qualityReport.score >= 60
+                         ? 'Fair quality. C-Grade achieved. Significant improvements in feed and hygiene are recommended.'
+                         : 'Quality below standard. D-Grade/Action Required. Immediate review of farm protocols is necessary.'}
+                    </p>
+                    <div className="space-y-4">
+                       <div className="flex justify-between items-center text-sm">
+                          <span className="text-white/40 font-bold uppercase tracking-widest">Quality Score</span>
+                          <span className="font-black">{qualityReport.score}/100</span>
+                       </div>
+                       <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                          <div className={`h-full ${qualityReport.ui.bgColor}`} style={{ width: `${qualityReport.score}%` }}></div>
+                       </div>
+                    </div>
+                 </div>
 
                 <button 
                   onClick={downloadQualityPDF}

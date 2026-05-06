@@ -2,7 +2,7 @@ import logging
 from typing import Optional, Dict, Any, List
 from uuid import UUID
 from sqlalchemy.orm import Session
-from app.models.health import Vet, Consultation, ConsultationStatus, Prescription, VaccinationRecord
+from app.models.health import Vet, Consultation, ConsultationStatus, Prescription, ClinicalVaccinationRecord
 from datetime import datetime, timedelta
 
 logger = logging.getLogger(__name__)
@@ -41,7 +41,7 @@ class VeterinaryService:
         return prescription
 
     def schedule_vaccination(self, cattle_id: UUID, vaccine_name: str, dose_date: datetime):
-        record = VaccinationRecord(
+        record = ClinicalVaccinationRecord(
             cattle_id=cattle_id,
             vaccine_name=vaccine_name,
             administered_at=dose_date,

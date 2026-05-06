@@ -52,8 +52,8 @@ class Prescription(Base, TimestampMixin):
     instructions = Column(Text)
     valid_until = Column(DateTime(timezone=True))
 
-class VaccinationRecord(Base, TimestampMixin):
-    __tablename__ = "vaccinations"
+class ClinicalVaccinationRecord(Base, TimestampMixin):
+    __tablename__ = "clinical_vaccinations"
     
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     cattle_id = Column(UUID(as_uuid=True), ForeignKey("cattle.id"), index=True)

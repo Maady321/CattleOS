@@ -54,7 +54,7 @@ class MalayalamVoiceProcessor:
                 "quantity_liters": qty,
                 "session": session
             },
-            "confirmation_text": f"{qty} ലിറ്റർ പാൽ {session == 'Morning' ? 'രാവിലെ' : 'വൈകുന്നേരം'} രേഖപ്പെടുത്തട്ടെ?"
+            "confirmation_text": f"{qty} ലിറ്റർ പാൽ {('രാവിലെ' if session == 'Morning' else 'വൈകുന്നേരം')} രേഖപ്പെടുത്തട്ടെ?"
         }
 
     def _parse_medicine(self, text: str) -> Dict[str, Any]:

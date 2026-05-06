@@ -5,10 +5,13 @@ import { motion } from 'framer-motion';
 import { User, Shield, Bell, MapPin, Globe, Save, Camera, Smartphone, Mail, Lock, Languages } from 'lucide-react';
 import { useCattleStore } from '@/store/cattleStore';
 import { useAuthStore } from '@/store/authStore';
+import { translations, Language } from '@/lib/translations';
 
 export default function SettingsPage() {
   const { cattle } = useCattleStore();
   const { user, updateUser } = useAuthStore();
+  const lang = (user?.language || 'en') as Language;
+  const t = translations[lang] || translations.en;
   const [activeSection, setActiveSection] = useState('profile');
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
@@ -17,7 +20,7 @@ export default function SettingsPage() {
     full_name: user?.full_name || '',
     phone_number: user?.phone_number || '',
     email: user?.email || '',
-    language: user?.language || 'English',
+    language: user?.language || 'en',
     profile_image: user?.profile_image || ''
   });
 
@@ -42,24 +45,24 @@ export default function SettingsPage() {
     // Simulate API Call
     setTimeout(() => {
       setIsSaving(false);
-      setSaveStatus('Profile updated successfully!');
+      setSaveStatus(t.settingsPage.profile.success);
       setTimeout(() => setSaveStatus(null), 3000);
     }, 1000);
   };
 
   const sections = [
-    { id: 'profile', label: 'Personal Profile', icon: User },
-    { id: 'farm', label: 'Farm Configuration', icon: MapPin },
-    { id: 'notifications', label: 'Alert Preferences', icon: Bell },
-    { id: 'security', label: 'Account Security', icon: Shield },
+    { id: 'profile', label: t.settingsPage.tabs.profile, icon: User },
+    { id: 'farm', label: t.settingsPage.tabs.farm, icon: MapPin },
+    { id: 'notifications', label: t.settingsPage.tabs.notifications, icon: Bell },
+    { id: 'security', label: t.settingsPage.tabs.security, icon: Shield },
   ];
 
   return (
     <div className="p-8 max-w-6xl mx-auto">
       {/* Header */}
       <div className="mb-12">
-        <h1 className="text-4xl font-black tracking-tight mb-2">Settings</h1>
-        <p className="text-black/40 font-medium">Manage your personal profile, farm data, and account security.</p>
+        <h1 className="text-4xl font-black tracking-tight mb-2 text-white">{t.settingsPage.title}</h1>
+        <p className="text-white/40 font-medium">{t.settingsPage.sub}</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
@@ -72,8 +75,8 @@ export default function SettingsPage() {
               suppressHydrationWarning
               className={`w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-bold transition-all ${
                 activeSection === section.id 
-                  ? 'bg-patch-black text-white shadow-premium' 
-                  : 'text-black/40 hover:bg-black/5 hover:text-black'
+                  ? 'bg-emerald-500 text-white shadow-premium' 
+                  : 'text-white/40 hover:bg-white/5 hover:text-white'
               }`}
             >
               <section.icon size={20} />
@@ -103,13 +106,13 @@ export default function SettingsPage() {
                   </div>
                    <div>
                     <h3 className="text-xl font-black mb-1">{formData.full_name || 'Owner Name'}</h3>
-                    <p className="text-sm font-bold text-black/30 uppercase tracking-widest">Farmer ID: #OS-{user?.id || 'PENDING'}</p>
+                    <p className="text-sm font-bold text-black/60 uppercase tracking-widest">Farmer ID: #OS-{user?.id || 'PENDING'}</p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="space-y-3">
-                    <label className="text-xs font-black uppercase tracking-widest text-black/30 ml-1">Full Name</label>
+                    <label className="text-xs font-black uppercase tracking-widest text-black/60 ml-1">{t.settingsPage.profile.name}</label>
                     <div className="relative">
                        <User size={18} className="absolute left-6 top-1/2 -translate-y-1/2 text-black/20" />
                        <input 
@@ -122,7 +125,7 @@ export default function SettingsPage() {
                     </div>
                   </div>
                   <div className="space-y-3">
-                    <label className="text-xs font-black uppercase tracking-widest text-black/30 ml-1">Phone Number</label>
+                    <label className="text-xs font-black uppercase tracking-widest text-black/60 ml-1">{t.settingsPage.profile.phone}</label>
                     <div className="relative">
                        <Smartphone size={18} className="absolute left-6 top-1/2 -translate-y-1/2 text-black/20" />
                        <input 
@@ -135,7 +138,7 @@ export default function SettingsPage() {
                     </div>
                   </div>
                   <div className="space-y-3">
-                    <label className="text-xs font-black uppercase tracking-widest text-black/30 ml-1">Email Address</label>
+                    <label className="text-xs font-black uppercase tracking-widest text-black/60 ml-1">{t.settingsPage.profile.email}</label>
                     <div className="relative">
                        <Mail size={18} className="absolute left-6 top-1/2 -translate-y-1/2 text-black/20" />
                        <input 
@@ -148,7 +151,7 @@ export default function SettingsPage() {
                     </div>
                   </div>
                   <div className="space-y-3">
-                    <label className="text-xs font-black uppercase tracking-widest text-black/30 ml-1">Preferred Language</label>
+                    <label className="text-xs font-black uppercase tracking-widest text-black/60 ml-1">{t.settingsPage.profile.language}</label>
                     <div className="relative">
                        <Languages size={18} className="absolute left-6 top-1/2 -translate-y-1/2 text-black/20" />
                        <select 
@@ -157,8 +160,8 @@ export default function SettingsPage() {
                          onChange={(e) => setFormData({...formData, language: e.target.value})}
                          className="w-full pl-14 pr-6 py-4 bg-black/5 rounded-2xl border-none outline-none focus:ring-2 focus:ring-black/5 font-bold appearance-none"
                        >
-                          <option>English</option>
-                          <option>മലയാളം (Malayalam)</option>
+                          <option value="en">English</option>
+                          <option value="ml">മലയാളം (Malayalam)</option>
                        </select>
                     </div>
                   </div>
@@ -171,7 +174,7 @@ export default function SettingsPage() {
                     suppressHydrationWarning 
                     className="bg-patch-black text-white px-10 py-5 rounded-[24px] font-black shadow-2xl flex items-center gap-3 hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
                   >
-                    {isSaving ? 'Saving...' : <><Save size={20} /> Save Changes</>}
+                    {isSaving ? t.settingsPage.profile.saving : <><Save size={20} /> {t.settingsPage.profile.save}</>}
                   </button>
                   {saveStatus && (
                     <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-grass-green font-bold">
@@ -184,7 +187,7 @@ export default function SettingsPage() {
 
             {activeSection === 'farm' && (
               <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} className="space-y-8">
-                 <h3 className="text-2xl font-black tracking-tight mb-8">Farm Details</h3>
+                 <h3 className="text-2xl font-black tracking-tight mb-8">{t.settingsPage.farm.title}</h3>
                  <div className="p-8 bg-black/5 rounded-[32px] border border-black/5 relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-grass-green/5 blur-[50px]"></div>
                     <div className="flex justify-between items-start mb-6">
@@ -192,7 +195,7 @@ export default function SettingsPage() {
                           <p className="text-lg font-black">Farm Branch 1</p>
                           <p className="text-sm font-bold text-black/40 flex items-center gap-1"><MapPin size={14}/> Not Set</p>
                        </div>
-                       <span className="bg-grass-green/10 text-grass-green px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest">Primary Farm</span>
+                       <span className="bg-grass-green/10 text-grass-green px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest">{t.settingsPage.farm.primary}</span>
                     </div>
                     <div className="grid grid-cols-3 gap-4">
                        <div className="p-4 bg-white rounded-2xl shadow-sm">
@@ -210,7 +213,7 @@ export default function SettingsPage() {
                     </div>
                  </div>
                  <button className="w-full py-5 border-2 border-dashed border-black/10 rounded-[32px] text-black/40 font-black hover:border-black/20 hover:text-black transition-all">
-                    + Add New Farm Branch
+                    + {t.settingsPage.farm.add}
                  </button>
               </motion.div>
             )}

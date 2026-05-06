@@ -1,8 +1,8 @@
-from typing import Any, List
+from typing import Any, List, Dict
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.api import deps
-from app.models.health import Vet, Consultation, Prescription, VaccinationRecord
+from app.models.health import Vet, Consultation, Prescription, ClinicalVaccinationRecord
 from app.schemas.health_ops import (
     VetOnboarding, 
     ConsultationRequest, 
@@ -57,7 +57,7 @@ def get_cattle_case_history(
     current_user = Depends(deps.get_current_active_user)
 ) -> Any:
     consultations = db.query(Consultation).filter(Consultation.cattle_id == cattle_id).all()
-    vaccinations = db.query(VaccinationRecord).filter(VaccinationRecord.cattle_id == cattle_id).all()
+    vaccinations = db.query(ClinicalVaccinationRecord).filter(ClinicalVaccinationRecord.cattle_id == cattle_id).all()
     
     return {
         "cattle_id": cattle_id,

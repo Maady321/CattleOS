@@ -3,11 +3,17 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, HeartPulse, Zap, Info, CheckCircle2, MoreVertical, Trash2, Search, Filter, X, Calendar, Clock } from 'lucide-react';
+import { useAuthStore } from '@/store/authStore';
+import { translations, Language } from '@/lib/translations';
 
 import { useCattleStore, Alert, AlertType } from '@/store/cattleStore';
 
 export default function AlertsPage() {
   const { alerts, markAlertRead, removeAlert, markAllAlertsRead } = useCattleStore();
+  const { user } = useAuthStore();
+  
+  const lang = (user?.language || 'en') as Language;
+  const t = translations[lang] || translations.en;
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
 
   const getTypeStyles = (type: AlertType) => {
@@ -32,26 +38,26 @@ export default function AlertsPage() {
       {/* Header */}
       <div className="flex justify-between items-center mb-12">
         <div>
-          <h1 className="text-4xl font-black tracking-tight mb-2">Notifications</h1>
-          <p className="text-black/40 font-medium">Manage your herd alerts and system reminders.</p>
+          <h1 className="text-4xl font-black tracking-tight mb-2">{t.alertsPage.title}</h1>
+          <p className="text-black/40 font-medium">{t.alertsPage.sub}</p>
         </div>
         <div className="flex gap-4">
            <button 
              onClick={markAllAlertsRead}
              className="text-xs font-bold uppercase tracking-widest text-black/40 hover:text-black transition-colors"
            >
-             Mark all as read
+             {t.alertsPage.markAll}
            </button>
         </div>
       </div>
 
       {/* Filter Bar */}
-      <div className="flex items-center gap-4 mb-10 overflow-x-auto pb-2">
-        <div className="relative flex-1 min-w-[300px]">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-10 overflow-x-auto pb-2">
+        <div className="relative flex-1">
           <Search size={18} className="absolute left-6 top-1/2 -translate-y-1/2 text-black/20" />
           <input 
             type="text" 
-            placeholder="Search alerts..." 
+            placeholder={t.alertsPage.search}
             className="w-full pl-14 pr-6 py-4 bg-white border border-black/5 rounded-2xl font-bold shadow-sm outline-none focus:ring-2 focus:ring-black/5"
           />
         </div>
@@ -77,12 +83,12 @@ export default function AlertsPage() {
               >
                 {!alert.isRead && <div className={`absolute top-0 left-0 w-1.5 h-full ${styles.color.replace('text', 'bg')}`}></div>}
                 
-                <div className="flex gap-6 items-start">
-                  <div className={`w-14 h-14 ${styles.bg} ${styles.color} rounded-2xl flex items-center justify-center shrink-0`}>
-                    <styles.icon size={28} />
+                <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start">
+                  <div className={`w-12 h-12 sm:w-14 sm:h-14 ${styles.bg} ${styles.color} rounded-2xl flex items-center justify-center shrink-0`}>
+                    <styles.icon size={24} className="sm:size-[28px]" />
                   </div>
                   
-                  <div className="flex-1">
+                  <div className="flex-1 w-full">
                     <div className="flex justify-between items-start mb-2">
                       <h3 className="text-xl font-black tracking-tight">{alert.title}</h3>
                       <span className="text-xs font-bold text-black/20 uppercase tracking-widest">{alert.time}</span>
@@ -120,8 +126,8 @@ export default function AlertsPage() {
              <div className="w-20 h-20 bg-black/5 rounded-full flex items-center justify-center mx-auto mb-6 text-black/10">
                 <Bell size={40} />
              </div>
-             <h3 className="text-2xl font-black mb-2">All caught up!</h3>
-             <p className="text-black/40 font-bold">You have no new notifications.</p>
+             <h3 className="text-2xl font-black mb-2">{t.alertsPage.empty}</h3>
+             <p className="text-black/40 font-bold">{t.alertsPage.emptySub}</p>
           </motion.div>
         )}
       </div>

@@ -2,7 +2,7 @@ import logging
 import json
 import redis
 from datetime import datetime, timedelta
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 from uuid import UUID
 from sqlalchemy.orm import Session
 from app.models.messaging import MessageLog, MessageStatus, MessageProvider, WorkflowRule, UserMessagingPreference

@@ -2,7 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { HeartPulse, Syringe, Pill, Activity, AlertTriangle, Plus, Search, Filter, ChevronRight, Stethoscope, Clock, X } from 'lucide-react';
+import { HeartPulse, Syringe, Pill, Activity, AlertTriangle, Plus, Search, Filter, ChevronRight, Stethoscope, Clock, X, Calendar } from 'lucide-react';
+import { useAuthStore } from '@/store/authStore';
+import { translations, Language } from '@/lib/translations';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { useCattleStore } from '@/store/cattleStore';
@@ -11,6 +13,10 @@ import autoTable from 'jspdf-autotable';
 
 export default function HealthPage() {
   const { cattle, productionLogs, alerts, addAlert, isAiMonitorEnabled, toggleAiMonitor, hasHydrated } = useCattleStore();
+  const { user } = useAuthStore();
+  
+  const lang = (user?.language || 'en') as Language;
+  const t = translations[lang] || translations.en;
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -162,9 +168,9 @@ export default function HealthPage() {
   });
 
   const tabs = [
-    { id: 'records', label: 'All Records', icon: Activity },
-    { id: 'vaccinations', label: 'Vaccinations', icon: Syringe },
-    { id: 'medications', label: 'Medications', icon: Pill },
+    { id: 'records', label: t.health.tabs.all, icon: Activity },
+    { id: 'vaccinations', label: t.health.tabs.vaccinations, icon: Syringe },
+    { id: 'medications', label: t.health.tabs.medications, icon: Pill },
   ];
 
   const handleAddLog = (e: React.FormEvent) => {
@@ -179,62 +185,88 @@ export default function HealthPage() {
     setIsModalOpen(false);
   };
 
+  const upcomingEvents = [
+    { date: '12 May', event: 'FMD Vaccination', status: 'Scheduled', cow: 'All Herd' },
+    { date: '15 May', event: 'Deworming Cycle', status: 'Pending', cow: 'Batch B' },
+    { date: '20 May', event: 'Vet Monthly Audit', status: 'Confirmed', cow: 'Full Farm' },
+  ];
+
   return (
-    <div className="p-8 max-w-7xl mx-auto relative">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto relative">
+      {/* Header - Hidden on mobile as Layout handles it */}
+      <div className="hidden lg:flex justify-between items-center mb-12">
         <div>
-          <h1 className="text-4xl font-black tracking-tight mb-2">Health Management</h1>
-          <p className="text-black/40 font-medium">Monitor herd health, vaccinations, and medical history.</p>
+          <h1 className="text-4xl font-black tracking-tight mb-2">{t.health.title}</h1>
+          <p className="text-black/40 font-medium">{t.health.sub}</p>
         </div>
         <button 
           onClick={() => setIsModalOpen(true)}
           className="bg-patch-black text-white px-8 py-4 rounded-2xl font-black flex items-center gap-3 hover:scale-105 active:scale-95 transition-all shadow-xl"
         >
-          <Plus size={20} /> Log Health Event
+          <Plus size={20} /> {t.health.logEvent}
         </button>
       </div>
 
-      {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+      {/* MOBILE QUICK ACTION */}
+      <div className="lg:hidden mb-10 mt-[-20px]">
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="w-full bg-patch-black text-white py-4 rounded-2xl font-black flex items-center justify-center gap-2 shadow-2xl active:scale-[0.98] transition-all text-sm"
+        >
+          <Plus size={20} /> {t.health.logEvent}
+        </button>
+      </div>
+
+       {/* Quick Stats Grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-8">
         {[
-          { label: 'Critical Alerts', value: '0', icon: AlertTriangle, color: 'text-red-500', bg: 'bg-red-50' },
-          { label: 'Pending Vaccinations', value: '0', icon: Syringe, color: 'text-blue-500', bg: 'bg-blue-50' },
-          { label: 'On Medication', value: '0', icon: Pill, color: 'text-orange-500', bg: 'bg-orange-50' },
-          { label: 'Health Score', value: '100%', icon: HeartPulse, color: 'text-grass-green', bg: 'bg-green-50' },
+          { label: t.health.stats.critical, value: '0', icon: AlertTriangle, color: 'text-red-500', bg: 'bg-red-50' },
+          { label: 'Vaccinations', value: '0', icon: Syringe, color: 'text-blue-500', bg: 'bg-blue-50' },
+          { label: 'Medications', value: '0', icon: Pill, color: 'text-orange-500', bg: 'bg-orange-50' },
+          { label: t.health.stats.score, value: '100%', icon: HeartPulse, color: 'text-grass-green', bg: 'bg-green-50' },
         ].map((stat, i) => (
-          <motion.div 
+           <motion.div 
             key={i}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
-            className="bg-white p-6 rounded-3xl border border-black/5 shadow-sm"
+            className={`p-4 md:p-6 rounded-[28px] border transition-all duration-300 flex flex-col items-center text-center ${
+               stat.label === t.health.stats.score 
+               ? 'bg-patch-black text-white border-white/10 shadow-2xl' 
+               : 'bg-white border-black/5 shadow-sm'
+            }`}
           >
-            <div className={`w-12 h-12 ${stat.bg} ${stat.color} rounded-2xl flex items-center justify-center mb-4`}>
-              <stat.icon size={24} />
+            <div className={`w-10 h-10 md:w-12 md:h-12 rounded-2xl flex items-center justify-center mb-2 md:mb-4 ${
+               stat.label === t.health.stats.score ? 'bg-grass-green text-white shadow-[0_0_20px_rgba(46,204,113,0.4)]' : `${stat.bg} ${stat.color}`
+            }`}>
+              <stat.icon size={18} className="md:size-[24px]" />
             </div>
-            <p className="text-xs font-black uppercase tracking-widest text-black/30 mb-1">{stat.label}</p>
-            <p className="text-3xl font-black tracking-tight">{stat.value}</p>
+            <p className={`text-[9px] font-black uppercase tracking-tight mb-0.5 leading-tight ${stat.label === t.health.stats.score ? 'text-white/40' : 'text-black/30'}`}>
+              {stat.label}
+            </p>
+            <p className="text-xl md:text-3xl font-black tracking-tight">{stat.value}</p>
           </motion.div>
         ))}
       </div>
 
       {/* Navigation Tabs */}
-      <div className="flex items-center gap-2 p-1.5 bg-black/5 rounded-2xl w-fit mb-10">
+      <div className="flex justify-center mb-10">
+        <div className="flex items-center gap-1.5 p-1.5 bg-black/5 rounded-[20px] overflow-x-auto no-scrollbar max-w-full">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id as any)}
-            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all ${
-              activeTab === tab.id 
-                ? 'bg-white text-black shadow-md' 
-                : 'text-black/40 hover:text-black'
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-[11px] uppercase tracking-widest transition-all ${
+               activeTab === tab.id 
+                 ? 'bg-white text-black shadow-md' 
+                 : 'text-black/30 hover:text-black'
             }`}
           >
-            <tab.icon size={16} />
+            <tab.icon size={14} />
             {tab.label}
           </button>
         ))}
+        </div>
       </div>
 
       {/* Main Content Area */}
@@ -293,6 +325,56 @@ export default function HealthPage() {
         )}
       </div>
 
+      {/* Upcoming Schedule & Vet Connect */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-12">
+         <div className="bg-patch-black p-10 rounded-[40px] border border-white/5 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 blur-[60px]"></div>
+            <div className="relative z-10">
+               <div className="flex justify-between items-center mb-8">
+                  <h4 className="text-2xl font-black text-white tracking-tight">Upcoming Schedule</h4>
+                  <Calendar className="text-white/20" size={24} />
+               </div>
+               <div className="space-y-6">
+                  {upcomingEvents.map((event, i) => (
+                     <div key={i} className="flex items-center gap-6 p-4 bg-white/5 rounded-2xl border border-white/5">
+                        <div className="w-12 h-12 bg-white/5 rounded-xl flex flex-col items-center justify-center border border-white/10 shrink-0">
+                           <span className="text-[10px] font-black text-white/30 uppercase">{event.date.split(' ')[1]}</span>
+                           <span className="text-lg font-black text-white">{event.date.split(' ')[0]}</span>
+                        </div>
+                        <div className="flex-1">
+                           <p className="font-bold text-white text-base">{event.event}</p>
+                           <p className="text-xs text-white/40">{event.cow}</p>
+                        </div>
+                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                           event.status === 'Scheduled' ? 'bg-blue-500/20 text-blue-400' : 'bg-orange-500/20 text-orange-400'
+                        }`}>
+                           {event.status}
+                        </span>
+                     </div>
+                  ))}
+               </div>
+            </div>
+         </div>
+
+         <div className="bg-gradient-to-br from-grass-green to-emerald-900 p-10 rounded-[40px] flex flex-col justify-between group cursor-pointer hover:scale-[1.02] transition-transform shadow-2xl">
+            <div>
+               <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-white mb-8 border border-white/20">
+                  <Stethoscope size={32} />
+               </div>
+               <h4 className="text-3xl font-black text-white mb-4 leading-tight">Professional Vet Consultation</h4>
+               <p className="text-white/60 font-medium text-lg max-w-sm">Need professional advice? Connect with our panel of certified veterinarians instantly.</p>
+            </div>
+            <div className="flex items-center gap-4 mt-12">
+               <button className="flex-1 py-5 bg-white text-patch-black rounded-2xl font-black shadow-xl hover:bg-emerald-50 transition-colors">
+                  Contact Vet
+               </button>
+               <button className="w-16 h-16 bg-black/20 text-white rounded-2xl flex items-center justify-center border border-white/10 hover:bg-black/30 transition-colors">
+                  <Clock size={24} />
+               </button>
+            </div>
+         </div>
+      </div>
+
       {/* AI Insights Section */}
       <div className="mt-12 space-y-8">
         <motion.div 
@@ -307,7 +389,7 @@ export default function HealthPage() {
             <div className="max-w-2xl">
               <div className="flex items-center gap-3 text-grass-green font-black text-xs uppercase tracking-[0.2em] mb-6">
                 <Activity size={16} className={isAnalyzing ? 'animate-pulse' : ''} />
-                {isAiMonitorEnabled ? (isAnalyzing ? 'Analyzing Herd Patterns...' : 'Monitor Active') : 'AI Health Diagnostic Ready'}
+                {isAiMonitorEnabled ? (isAnalyzing ? t.health.ai.scanning : t.health.ai.active) : t.health.ai.title}
               </div>
               <h2 className="text-3xl font-black mb-4 leading-tight text-white">
                 {isAiMonitorEnabled ? 'Your herd is being monitored in real-time.' : 'Predict potential illnesses before symptoms appear.'}
@@ -326,7 +408,7 @@ export default function HealthPage() {
                   : 'bg-white text-black hover:scale-105'
               }`}
             >
-              {isAiMonitorEnabled ? 'Disable AI Monitor' : 'Enable AI Health Monitor'} <ChevronRight size={20} />
+              {isAiMonitorEnabled ? t.health.ai.disable : t.health.ai.enable} <ChevronRight size={20} />
             </button>
           </div>
         </motion.div>
