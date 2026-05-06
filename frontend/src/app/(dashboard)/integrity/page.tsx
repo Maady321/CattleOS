@@ -27,32 +27,53 @@ const mockAnomalies = [
   { id: 3, type: 'DUPLICATE', severity: 'LOW', domain: 'Feed Logs', description: 'Identical grain entries for Herd B within 2ms', date: '2026-05-05 18:30' },
 ];
 
+import { Button, Input, Skeleton } from '@/components/ui/core';
+
 export default function IntegrityDashboard() {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
   const runReconciliation = () => {
-    setLoading(true);
-    setTimeout(() => setLoading(false), 2000);
+    // Logic
   };
+
+  if (loading) {
+    return (
+      <div className="p-8 max-w-7xl mx-auto space-y-8">
+        <div className="flex justify-between items-center">
+          <Skeleton className="h-10 w-64" />
+          <Skeleton className="h-12 w-48" />
+        </div>
+        <div className="grid grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-32 w-full" />)}
+        </div>
+        <div className="grid grid-cols-3 gap-8">
+          <Skeleton className="col-span-2 h-96" />
+          <Skeleton className="h-96" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-700">
-      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-cyan-400">
-            Data Integrity & Reconciliation
+            Data Integrity
           </h1>
-          <p className="text-slate-400 mt-1">Real-time correctness monitoring and audit provenance.</p>
+          <p className="text-slate-400 mt-1">Real-time correctness monitoring.</p>
         </div>
-        <button 
+        <Button 
           onClick={runReconciliation}
-          disabled={loading}
-          className="flex items-center gap-2 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-800 text-white rounded-xl transition-all shadow-lg shadow-emerald-500/20 group"
+          leftIcon={<RefreshCcw className="w-5 h-5" />}
         >
-          <RefreshCcw className={`w-5 h-5 ${loading ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
-          {loading ? 'Reconciling...' : 'Run Global Reconciliation'}
-        </button>
+          Run Reconciliation
+        </Button>
       </div>
 
       {/* Stats Grid */}

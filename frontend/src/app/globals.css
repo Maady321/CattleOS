@@ -14,20 +14,40 @@
 
 :root {
   --background: var(--color-ivory);
-  --foreground: var(--color-patch-black);
+  /* Sunlight-Readable Palette */
+  --background: #000000; /* OLED Black for maximum contrast */
+  --surface: #111111;
+  --surface-hover: #1a1a1a;
   
-  --primary: var(--color-patch-black);
-  --primary-foreground: var(--color-ivory);
+  --primary: #10b981; /* High-Viz Emerald */
+  --primary-hover: #059669;
   
-  --accent: var(--color-grass-green);
-  --accent-foreground: var(--color-ivory);
+  --text-primary: #ffffff;
+  --text-secondary: #94a3b8;
+  
+  --border: rgba(255, 255, 255, 0.1);
+  
+  /* Tap Target Standards */
+  --tap-target: 56px;
+  --safe-area-bottom: env(safe-area-inset-bottom, 20px);
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
 
 body {
   background-color: var(--background);
-  color: var(--foreground);
+  color: var(--text-primary);
   font-family: 'Inter', sans-serif;
+  letter-spacing: -0.01em;
   overflow-x: hidden;
+}
+
+.tap-active {
+  transform: scale(0.95);
+  transition: transform 0.1s ease;
 }
 
 .cow-patch {
