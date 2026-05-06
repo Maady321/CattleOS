@@ -32,7 +32,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         whileTap={{ scale: 0.98 }}
         className={`inline-flex items-center justify-center gap-2 rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed ${variants[variant]} ${sizes[size]} ${className}`}
-        {...props}
+        {...(props as any)}
       >
         {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : leftIcon}
         {children}
