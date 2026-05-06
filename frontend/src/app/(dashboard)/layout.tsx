@@ -1,30 +1,29 @@
 "use client";
 
 import React, { useState } from 'react';
-import { LayoutDashboard, Users, HeartPulse, Milk, Pipette, Bell, Settings, LogOut, Menu, X, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, Users, HeartPulse, Milk, Bell, Settings, LogOut, Search, PlusCircle } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useCattleStore } from '@/store/cattleStore';
 import { useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import OneTapActionMenu from '@/components/ui/OneTapActionMenu';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { logout, user } = useAuthStore();
   const { alerts } = useCattleStore();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
   const unreadCount = alerts.filter(a => !a.isRead).length;
 
+  // FARMER-NATIVE IA (Information Architecture)
   const menuItems = [
-    { icon: LayoutDashboard, label: 'Overview', href: '/dashboard', activeColor: 'bg-grass-green', iconColor: 'text-white' },
-    { icon: Users, label: 'Cattle', href: '/dashboard/cattle', activeColor: 'bg-grass-green', iconColor: 'text-white' },
-    { icon: HeartPulse, label: 'Health', href: '/dashboard/health', activeColor: 'bg-grass-green', iconColor: 'text-white' },
-    { icon: Milk, label: 'Production', href: '/dashboard/production', activeColor: 'bg-grass-green', iconColor: 'text-white' },
-    { icon: Pipette, label: 'Breeding', href: '/dashboard/breeding', activeColor: 'bg-grass-green', iconColor: 'text-white' },
-    { icon: Bell, label: 'Alerts', href: '/dashboard/alerts', activeColor: 'bg-grass-green', iconColor: 'text-white' },
-    { icon: ShieldCheck, label: 'Integrity', href: '/dashboard/integrity', activeColor: 'bg-cyan-500', iconColor: 'text-white' },
+    { icon: LayoutDashboard, label: 'Home', href: '/dashboard' },
+    { icon: Users, label: 'My Herd', href: '/dashboard/cattle' },
+    { icon: Milk, label: 'Production', href: '/dashboard/production' },
+    { icon: HeartPulse, label: 'Health', href: '/dashboard/health' },
+    { icon: Bell, label: 'Alerts', href: '/dashboard/alerts' },
   ];
 
   const handleLogout = () => {
@@ -32,159 +31,96 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     router.push('/');
   };
 
-  const SidebarContent = () => (
-    <>
-      <div className="mb-12 flex items-center gap-3">
-        <div className="w-20 h-20 flex items-center justify-center group">
-           <img 
-             src="/image.png" 
-             className="w-full h-full object-contain scale-110 group-hover:scale-125 transition-transform duration-500" 
-             alt="Logo" 
-           />
-        </div>
-        <div>
-           <h1 className="text-2xl font-black tracking-tighter text-white leading-none">
-             Cattle<span className="text-grass-green">OS</span>
-           </h1>
-           <p className="text-[8px] font-black uppercase tracking-[0.3em] text-white/30 mt-1">Smart Herd Tech</p>
-        </div>
-      </div>
-
-      <nav className="flex-1 space-y-2">
-        {menuItems.map((item) => {
-          const isActive = pathname === item.href;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={() => setIsSidebarOpen(false)}
-              className={`flex items-center gap-4 px-6 py-4 rounded-2xl font-black transition-all duration-300 ${
-                isActive 
-                  ? `${item.activeColor} ${item.iconColor} shadow-xl scale-[1.02]` 
-                  : 'text-white/40 hover:bg-white/5 hover:text-white hover:translate-x-1'
-              }`}
-            >
-              <div className={`transition-transform duration-300 ${isActive ? 'scale-110' : ''}`}>
-                <item.icon size={22} strokeWidth={isActive ? 3 : 2} />
-              </div>
-              {item.label}
-              {item.label === 'Alerts' && unreadCount > 0 && !isActive && (
-                <span className="ml-auto w-5 h-5 bg-red-500 text-white text-[10px] flex items-center justify-center rounded-full animate-pulse">
-                  {unreadCount}
-                </span>
-              )}
-            </Link>
-          );
-        })}
-      </nav>
-
-      <div className="mt-auto pt-8 border-t border-white/10 space-y-6">
-        <div className="px-6 py-4 bg-white/5 rounded-[24px] flex items-center gap-4 border border-white/5">
-          <div className="w-10 h-10 bg-grass-green rounded-xl flex items-center justify-center text-white font-black shadow-lg overflow-hidden shrink-0">
-            {user?.profile_image ? (
-              <img src={user.profile_image} className="w-full h-full object-cover" alt="Profile" />
-            ) : (
-              (user?.full_name || 'SJ').split(' ').map(n => n[0]).join('').toUpperCase()
-            )}
+  return (
+    <div className="min-h-screen bg-black text-white selection:bg-emerald-500/30 overflow-x-hidden font-sans">
+      {/* ELITE TOP BAR - Minimal & High Visibility */}
+      <header className="fixed top-0 left-0 right-0 h-16 bg-black/60 backdrop-blur-2xl border-b border-white/5 z-50 px-6 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+            <Milk className="text-white w-5 h-5" />
           </div>
-          <div className="min-w-0">
-            <p className="text-sm font-black text-white truncate">{user?.full_name || 'Farm Owner'}</p>
-            <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest truncate">Premium Plan</p>
-          </div>
+          <h1 className="text-xl font-black tracking-tighter text-white italic">
+            Cattle<span className="text-emerald-500">OS</span>
+          </h1>
         </div>
-
-        <div className="space-y-2">
-          <Link href="/dashboard/settings" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-4 px-6 py-4 rounded-2xl font-bold text-white/40 hover:bg-white/5 hover:text-white transition-all">
-            <Settings size={22} />
-            Settings
-          </Link>
+        
+        <div className="flex items-center gap-4">
           <button 
-            onClick={handleLogout}
-            className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-bold text-red-400 hover:bg-red-400/10 transition-all text-left"
+            onClick={() => router.push('/dashboard/settings')}
+            className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-colors"
           >
-            <LogOut size={22} />
-            Logout
+            <Settings size={20} />
           </button>
         </div>
-      </div>
-    </>
-  );
+      </header>
 
-  return (
-    <div className="flex min-h-screen bg-ivory">
-      {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex w-80 bg-patch-black border-r border-white/5 p-8 flex-col">
-        <SidebarContent />
-      </aside>
-
-      {/* Mobile Sidebar Overlay */}
-      <AnimatePresence>
-        {isSidebarOpen && (
-          <>
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsSidebarOpen(false)}
-              className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
-            />
-            <motion.aside 
-              initial={{ x: '-100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '-100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="lg:hidden fixed inset-y-0 left-0 w-80 bg-patch-black p-8 flex flex-col z-50 shadow-2xl"
-            >
-              <button 
-                onClick={() => setIsSidebarOpen(false)}
-                className="absolute top-8 right-8 w-10 h-10 flex items-center justify-center rounded-xl bg-black/5"
-              >
-                <X size={20} />
-              </button>
-              <SidebarContent />
-            </motion.aside>
-          </>
-        )}
-      </AnimatePresence>
-
-      {/* Main Content */}
-      <main className="flex-1 p-6 md:p-12 overflow-y-auto w-full">
-        <header className="flex justify-between items-center mb-8 md:mb-12">
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={() => setIsSidebarOpen(true)}
-              className="lg:hidden w-12 h-12 flex items-center justify-center rounded-2xl bg-white border border-black/5 shadow-sm"
-            >
-              <Menu size={24} />
-            </button>
-            <h2 className="text-2xl md:text-3xl font-extrabold truncate max-w-[200px] sm:max-w-none">
-              {menuItems.find(item => item.href === pathname)?.label || 'Dashboard'}
-            </h2>
-          </div>
-          
-          <div className="flex items-center gap-3 md:gap-4">
-            <button 
-              onClick={() => router.push('/dashboard/alerts')}
-              className="p-3 bg-white rounded-2xl border border-black/5 shadow-sm relative group hover:scale-105 active:scale-95 transition-all"
-            >
-              <Bell size={20} className={unreadCount > 0 ? 'text-black animate-swing' : 'text-black/40'} />
-              {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-black flex items-center justify-center rounded-full border-2 border-white shadow-lg group-hover:scale-110 transition-transform">
-                  {unreadCount > 9 ? '9+' : unreadCount}
-                </span>
-              )}
-            </button>
-            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-grass-green flex items-center justify-center text-white font-bold overflow-hidden shadow-lg border-2 border-white">
-              {user?.profile_image ? (
-                 <img src={user.profile_image} className="w-full h-full object-cover" alt="Profile" />
-              ) : (
-                (user?.full_name || 'SJ').split(' ').map(n => n[0]).join('').toUpperCase()
-              )}
-            </div>
-          </div>
+      {/* MAIN VIEWPORT - Padded for Top Bar and Bottom Nav */}
+      <main className="pt-20 pb-36 px-4 md:px-8 max-w-lg md:max-w-4xl mx-auto">
+        <header className="mb-8">
+           <h2 className="text-3xl font-black tracking-tight text-white">
+             {menuItems.find(item => item.href === pathname)?.label || 'Overview'}
+           </h2>
+           <p className="text-slate-500 text-sm font-medium mt-1">
+             {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}
+           </p>
         </header>
-        {children}
+        
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+        >
+          {children}
+        </motion.div>
       </main>
+
+      {/* ONE-THUMB BOTTOM NAVIGATION - Elite Rural Ergonomics */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-3xl border-t border-white/10 z-[90] pb-safe">
+        <div className="flex justify-between items-center h-20 max-w-lg mx-auto px-2">
+          {menuItems.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link 
+                key={item.href} 
+                href={item.href}
+                className={`relative flex flex-col items-center justify-center gap-1.5 flex-1 h-full transition-all active:scale-90 ${
+                  isActive ? 'text-emerald-400' : 'text-slate-500'
+                }`}
+              >
+                <div className={`p-2 rounded-2xl transition-all ${isActive ? 'bg-emerald-500/10 shadow-[0_0_20px_rgba(16,185,129,0.1)]' : ''}`}>
+                  <item.icon size={isActive ? 24 : 22} strokeWidth={isActive ? 3 : 2} />
+                </div>
+                <span className="text-[9px] font-black uppercase tracking-widest leading-none">
+                  {item.label}
+                </span>
+                {isActive && (
+                  <motion.div 
+                    layoutId="nav-pill" 
+                    className="absolute -top-0.5 w-8 h-1 bg-emerald-500 rounded-full" 
+                    transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
+                {item.label === 'Alerts' && unreadCount > 0 && (
+                  <span className="absolute top-3 right-3 w-4 h-4 bg-red-500 text-white text-[8px] font-black flex items-center justify-center rounded-full border-2 border-black animate-pulse">
+                    {unreadCount}
+                  </span>
+                )}
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
+      
+      {/* ACTION HUB - Instant Access to Logging */}
+      <OneTapActionMenu />
+
+      {/* OFFLINE STATUS INDICATOR */}
+      <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[100] pointer-events-none">
+         <div className="bg-emerald-500/10 backdrop-blur-md border border-emerald-500/20 px-3 py-1 rounded-full flex items-center gap-2 shadow-2xl shadow-emerald-500/20">
+            <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+            <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">System Online</span>
+         </div>
+      </div>
     </div>
   );
 }

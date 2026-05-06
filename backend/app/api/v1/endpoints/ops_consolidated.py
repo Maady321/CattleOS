@@ -6,7 +6,8 @@ from app.api.v1.endpoints import (
     admin_ops, 
     observability, 
     dr,
-    integrity
+    integrity,
+    pilot_ops
 )
 
 router = APIRouter()
@@ -18,4 +19,5 @@ router.include_router(success.router, prefix="/success", tags=["success"])
 router.include_router(observability.router, prefix="/observability", tags=["observability"])
 router.include_router(dr.router, prefix="/dr", tags=["dr"])
 router.include_router(integrity.router, prefix="/integrity", tags=["integrity"])
-router.include_router(operations.router, prefix="/pilot", tags=["pilot_ops"])
+router.include_router(pilot_ops.router, prefix="/pilot", tags=["pilot_ops"])
+router.include_router(operations.router, prefix="/ops", tags=["ops"])

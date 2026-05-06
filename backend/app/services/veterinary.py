@@ -1,10 +1,9 @@
 import logging
-from datetime import datetime, timedelta
 from typing import Optional, Dict, Any, List
 from uuid import UUID
 from sqlalchemy.orm import Session
-from app.models.veterinary import Consultation, ConsultationType, ConsultationStatus, Prescription, VetProfile
-from app.models.logs import HealthLog
+from app.models.health import Vet, Consultation, ConsultationStatus, Prescription, VaccinationRecord
+from datetime import datetime, timedelta
 
 logger = logging.getLogger(__name__)
 
@@ -12,77 +11,48 @@ class VeterinaryService:
     def __init__(self, db: Session):
         self.db = db
 
-    def book_consultation(self, farm_id: UUID, vet_id: UUID, cattle_id: UUID, sched_at: datetime, c_type: ConsultationType) -> Consultation:
-        """
-        Books a veterinary consultation.
-        """
-        consultation = Consultation(
+    def book_consultation(self, farm_id: UUID, cattle_id: UUID, vet_id: UUID, symptoms: str, is_emergency: bool = False) -> Consultation:
+        consult = Consultation(
             farm_id=farm_id,
+            cattle_id=cattle_id,
             vet_id=vet_id,
-            cattle_id=cattle_id,
-            scheduled_at=sched_at,
-            type=c_type,
-            status=ConsultationStatus.SCHEDULED
+            symptoms=symptoms,
+            is_emergency=is_emergency,
+            status=ConsultationStatus.REQUESTED
         )
-        
-        if c_type == ConsultationType.TELECONSULT:
-            consultation.meeting_url = f"https://meet.cattleos.com/{UUID(int=0)}" # Mock URL
-            
-        self.db.add(consultation)
+        self.db.add(consult)
         self.db.commit()
-        return consultation
-
-    def trigger_emergency_consult(self, farm_id: UUID, cattle_id: UUID, symptoms: str) -> Consultation:
-        """
-        Emergency flow: Assigns first available verified vet.
-        """
-        # Find verified vet (simplified logic)
-        vet = self.db.query(VetProfile).filter(VetProfile.is_verified == True).first()
-        if not vet:
-            raise ValueError("No emergency vets available")
+        
+        if is_emergency:
+            # Trigger emergency alert to Vet (Mock)
+            logger.warning(f"EMERGENCY Consultation created for Vet {vet_id}")
             
-        consultation = Consultation(
-            farm_id=farm_id,
-            vet_id=vet.id,
-            cattle_id=cattle_id,
-            type=ConsultationType.EMERGENCY,
-            status=ConsultationStatus.IN_PROGRESS,
-            scheduled_at=datetime.utcnow(),
-            started_at=datetime.utcnow(),
-            symptoms=symptoms
-        )
-        self.db.add(consultation)
-        self.db.commit()
-        return consultation
+        return consult
 
-    def complete_consultation(self, consultation_id: UUID, diagnosis: str, medicines: List[Dict[str, Any]]):
-        """
-        Finishes consultation, creates prescription, and updates health log.
-        """
-        consultation = self.db.query(Consultation).get(consultation_id)
-        if not consultation: return
-        
-        consultation.status = ConsultationStatus.COMPLETED
-        consultation.diagnosis = diagnosis
-        consultation.ended_at = datetime.utcnow()
-        
-        # 1. Create Prescription
+    def issue_prescription(self, consultation_id: UUID, medicines: List[Dict[str, Any]], instructions: str) -> Prescription:
         prescription = Prescription(
-            consultation_id=consultation.id,
-            cattle_id=consultation.cattle_id,
-            medicines_json=medicines,
-            instructions="As discussed in consultation"
+            consultation_id=consultation_id,
+            medicines=medicines,
+            instructions=instructions,
+            valid_until=datetime.utcnow() + timedelta(days=30)
         )
         self.db.add(prescription)
-        
-        # 2. Add to Cattle Health Log
-        health_log = HealthLog(
-            farm_id=consultation.farm_id,
-            cattle_id=consultation.cattle_id,
-            description=f"Vet Consultation: {diagnosis}",
-            diagnosis=diagnosis
-        )
-        self.db.add(health_log)
-        
         self.db.commit()
         return prescription
+
+    def schedule_vaccination(self, cattle_id: UUID, vaccine_name: str, dose_date: datetime):
+        record = VaccinationRecord(
+            cattle_id=cattle_id,
+            vaccine_name=vaccine_name,
+            administered_at=dose_date,
+            next_dose_at=dose_date + timedelta(days=180) # Default 6 months
+        )
+        self.db.add(record)
+        self.db.commit()
+        return record
+
+    def get_nearby_vets(self, lat: float, lng: float) -> List[Vet]:
+        """
+        Simple geo-discovery (In production, use PostGIS).
+        """
+        return self.db.query(Vet).filter(Vet.is_verified == True).all()

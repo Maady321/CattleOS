@@ -1,143 +1,148 @@
-"use client";
+'use client';
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, ArrowLeft, Home, User, Leaf, CheckCircle2 } from 'lucide-react';
+import { Button, Input } from '@/components/ui/core';
+import { Check, ArrowRight, Languages, Home, Activity, Bell } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function OnboardingPage() {
   const [step, setStep] = useState(1);
+  const [formData, setFormData] = useState({
+    language: 'ml',
+    farmName: '',
+    cattleName: '',
+    reminders: true
+  });
   const router = useRouter();
 
-  const nextStep = () => setStep(s => s + 1);
-  const prevStep = () => setStep(s => s - 1);
+  const next = () => setStep(s => s + 1);
+
+  const complete = () => {
+    // Analytics: track('ONBOARDING_COMPLETED', { duration: ... })
+    router.push('/dashboard');
+  };
+
+  const steps = [
+    {
+      id: 1,
+      title: 'Choose Language',
+      icon: <Languages className="w-16 h-16 text-emerald-400" />,
+      content: (
+        <div className="grid grid-cols-1 gap-4 mt-12">
+          <Button 
+            variant="secondary" 
+            size="xl" 
+            className="h-24 text-2xl font-black bg-white/5 border-2 border-white/10 hover:border-emerald-500/50"
+            onClick={() => {setFormData({...formData, language: 'ml'}); next();}}
+          >
+            മലയാളം
+          </Button>
+          <Button 
+            variant="secondary" 
+            size="xl" 
+            className="h-24 text-2xl font-black bg-white/5 border-2 border-white/10 hover:border-emerald-500/50"
+            onClick={() => {setFormData({...formData, language: 'en'}); next();}}
+          >
+            English
+          </Button>
+        </div>
+      )
+    },
+    {
+      id: 2,
+      title: 'Farm Name',
+      icon: <Home className="w-16 h-16 text-blue-400" />,
+      content: (
+        <div className="space-y-8 mt-12">
+          <Input 
+            placeholder="e.g. My Dairy Farm" 
+            autoFocus
+            className="text-2xl h-20 text-center"
+            value={formData.farmName} 
+            onChange={(e) => setFormData({...formData, farmName: e.target.value})}
+          />
+          <Button size="xl" className="w-full h-20" onClick={next} disabled={!formData.farmName}>
+            Next <ArrowRight className="ml-2" />
+          </Button>
+        </div>
+      )
+    },
+    {
+      id: 3,
+      title: 'First Animal',
+      icon: <Activity className="w-16 h-16 text-red-400" />,
+      content: (
+        <div className="space-y-8 mt-12">
+          <Input 
+            placeholder="Cow Name (e.g. Ganga)" 
+            autoFocus
+            className="text-2xl h-20 text-center"
+            value={formData.cattleName} 
+            onChange={(e) => setFormData({...formData, cattleName: e.target.value})}
+          />
+          <div className="flex flex-col gap-4">
+            <Button size="xl" className="w-full h-20" onClick={next} disabled={!formData.cattleName}>
+              Add Animal
+            </Button>
+            <button className="text-slate-500 text-sm font-black uppercase tracking-widest py-4" onClick={next}>
+              Skip for now
+            </button>
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 4,
+      title: 'Aha Moment',
+      icon: <Bell className="w-16 h-16 text-amber-400" />,
+      content: (
+        <div className="space-y-12 mt-12 text-center">
+          <p className="text-slate-400 text-lg font-medium leading-relaxed">
+            We'll send you a 1-tap WhatsApp alert for your morning milk logs.
+          </p>
+          <div className="p-8 bg-white/5 rounded-[40px] border border-white/5">
+             <div className="flex items-center justify-between">
+                <span className="text-xl font-bold">Daily Alerts</span>
+                <div className="w-16 h-8 bg-emerald-500 rounded-full flex items-center justify-end px-1">
+                   <div className="w-6 h-6 bg-white rounded-full shadow-lg" />
+                </div>
+             </div>
+          </div>
+          <Button size="xl" className="w-full h-20 shadow-2xl shadow-emerald-500/40" onClick={complete}>
+            Start Farming
+          </Button>
+        </div>
+      )
+    }
+  ];
+
+  const currentStep = steps.find(s => s.id === step);
 
   return (
-    <div className="min-h-screen bg-ivory flex items-center justify-center p-6">
-      <div className="max-w-2xl w-full">
-        {/* Progress Bar */}
-        <div className="flex justify-between mb-12 relative">
-          <div className="absolute top-1/2 left-0 w-full h-1 bg-black/5 -translate-y-1/2 -z-10"></div>
-          <div 
-            className="absolute top-1/2 left-0 h-1 bg-grass-green -translate-y-1/2 -z-10 transition-all duration-500"
-            style={{ width: `${((step - 1) / 2) * 100}%` }}
-          ></div>
-          {[1, 2, 3].map((i) => (
-            <div 
-              key={i} 
-              className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all duration-500 ${
-                step >= i ? 'bg-grass-green text-white shadow-lg' : 'bg-white border border-black/5 text-black/20'
-              }`}
-            >
-              {step > i ? <CheckCircle2 size={20} /> : i}
-            </div>
+    <div className="min-h-screen bg-black flex flex-col items-center justify-center p-8 font-sans overflow-hidden">
+      <div className="w-full max-w-md relative">
+        {/* LIGHTNING PROGRESS */}
+        <div className="flex gap-3 justify-center mb-16">
+          {steps.map(s => (
+            <div key={s.id} className={`h-2 rounded-full transition-all duration-700 ${s.id <= step ? 'bg-emerald-500 w-12' : 'bg-white/10 w-4'}`} />
           ))}
         </div>
 
         <AnimatePresence mode="wait">
-          {step === 1 && (
-            <motion.div 
-              key="step1"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="bg-white p-12 rounded-[40px] shadow-premium border border-black/5"
-            >
-              <div className="w-16 h-16 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center mb-8">
-                <User size={32} />
-              </div>
-              <h2 className="text-4xl font-black mb-4 tracking-tight">Complete your profile</h2>
-              <p className="text-black/40 font-medium mb-10 text-lg">Tell us a bit about yourself to personalize your experience.</p>
-              
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-bold mb-2 ml-1">Preferred Language</label>
-                  <select className="w-full px-6 py-4 rounded-2xl bg-black/5 border-none outline-none font-bold">
-                    <option>Malayalam</option>
-                    <option>English</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-bold mb-2 ml-1">Experience Level</label>
-                  <div className="grid grid-cols-2 gap-4">
-                    <button className="p-4 rounded-2xl border-2 border-grass-green bg-grass-green/5 text-grass-green font-bold">New Farmer</button>
-                    <button className="p-4 rounded-2xl border border-black/5 font-bold hover:bg-black/5">Pro Farmer</button>
-                  </div>
-                </div>
-              </div>
-
-              <button 
-                onClick={nextStep}
-                className="w-full mt-12 bg-patch-black text-white py-5 rounded-2xl font-black text-lg flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all"
-              >
-                Continue <ChevronRight />
-              </button>
-            </motion.div>
-          )}
-
-          {step === 2 && (
-            <motion.div 
-              key="step2"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="bg-white p-12 rounded-[40px] shadow-premium border border-black/5"
-            >
-              <button onClick={prevStep} className="mb-8 flex items-center gap-2 text-black/40 font-bold text-sm uppercase tracking-widest hover:text-black">
-                <ArrowLeft size={16} /> Back
-              </button>
-              <div className="w-16 h-16 bg-green-50 text-grass-green rounded-2xl flex items-center justify-center mb-8">
-                <Home size={32} />
-              </div>
-              <h2 className="text-4xl font-black mb-4 tracking-tight">Setup your Farm</h2>
-              <p className="text-black/40 font-medium mb-10 text-lg">Every great journey starts with a home for your herd.</p>
-              
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-bold mb-2 ml-1">Farm Name</label>
-                  <input type="text" placeholder="e.g. Green Valley Farm" className="w-full px-6 py-4 rounded-2xl bg-black/5 border-none outline-none font-bold focus:bg-white focus:ring-2 focus:ring-grass-green/20" />
-                </div>
-                <div>
-                  <label className="block text-sm font-bold mb-2 ml-1">Location (District)</label>
-                  <select className="w-full px-6 py-4 rounded-2xl bg-black/5 border-none outline-none font-bold">
-                    <option>Wayanad</option>
-                    <option>Idukki</option>
-                    <option>Palakkad</option>
-                    <option>Kottayam</option>
-                  </select>
-                </div>
-              </div>
-
-              <button 
-                onClick={nextStep}
-                className="w-full mt-12 bg-patch-black text-white py-5 rounded-2xl font-black text-lg flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all"
-              >
-                Continue <ChevronRight />
-              </button>
-            </motion.div>
-          )}
-
-          {step === 3 && (
-            <motion.div 
-              key="step3"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="bg-white p-12 rounded-[40px] shadow-premium border border-black/5 text-center"
-            >
-              <div className="w-24 h-24 bg-grass-green text-white rounded-[32px] flex items-center justify-center mb-10 mx-auto shadow-xl">
-                <CheckCircle2 size={48} />
-              </div>
-              <h2 className="text-4xl font-black mb-4 tracking-tight">You&apos;re all set!</h2>
-              <p className="text-black/40 font-medium mb-12 text-lg">CattleOS is ready to help you manage your farm like a pro.</p>
-              
-              <button 
-                onClick={() => router.push('/dashboard')}
-                className="w-full bg-grass-green text-white py-6 rounded-[24px] font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-xl"
-              >
-                Enter Dashboard
-              </button>
-            </motion.div>
-          )}
+          <motion.div
+            key={step}
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: -10 }}
+            transition={{ type: 'spring', damping: 20, stiffness: 150 }}
+            className="text-center"
+          >
+            <div className="flex justify-center mb-8">{currentStep?.icon}</div>
+            <h1 className="text-4xl font-black tracking-tight text-white mb-2">{currentStep?.title}</h1>
+            <p className="text-slate-500 font-bold uppercase tracking-widest text-[10px]">Step {step} of {steps.length}</p>
+            {currentStep?.content}
+          </motion.div>
         </AnimatePresence>
       </div>
     </div>
