@@ -39,6 +39,10 @@ class Settings(BaseSettings):
     REDIS_PORT: int = 6379
     REDIS_DB: int = 0
 
+    @property
+    def REDIS_URL(self) -> str:
+        return f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}/{self.REDIS_DB}"
+
     # OTP Settings
     OTP_TTL: int = 300  # 5 minutes
     OTP_MAX_ATTEMPTS: int = 5
@@ -63,6 +67,11 @@ class Settings(BaseSettings):
     SMTP_USER: Optional[str] = None
     SMTP_PASSWORD: Optional[str] = None
     SENDER_EMAIL: Optional[str] = None
+
+    # Billing
+    RAZORPAY_KEY_ID: Optional[str] = None
+    RAZORPAY_KEY_SECRET: Optional[str] = None
+    RAZORPAY_WEBHOOK_SECRET: Optional[str] = None
 
     # Observability
     SENTRY_DSN: Optional[str] = None

@@ -3,7 +3,7 @@ from sqlalchemy import Column, String, ForeignKey, Date, Float, Enum as SQLEnum
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 import enum
-from app.db.base_class import Base, TimestampMixin, SoftDeleteMixin
+from app.db.base_class import Base, TimestampMixin, SoftDeleteMixin, SyncMixin
 
 class CattleGender(str, enum.Enum):
     MALE = "male"
@@ -14,7 +14,7 @@ class CattleStatus(str, enum.Enum):
     SOLD = "sold"
     DECEASED = "deceased"
 
-class Cattle(Base, TimestampMixin, SoftDeleteMixin):
+class Cattle(Base, TimestampMixin, SoftDeleteMixin, SyncMixin):
     __tablename__ = "cattle"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)

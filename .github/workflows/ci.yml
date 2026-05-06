@@ -1,0 +1,68 @@
+name: CattleOS CI/CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-and-coverage:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: cattleos_test
+        ports:
+          - 5432:5432
+      redis:
+        image: redis:alpine
+        ports:
+          - 6379:6379
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        cd backend
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-cov
+
+    - name: Run Tests with Coverage
+      env:
+        SQLALCHEMY_DATABASE_URI: postgresql://postgres:password@localhost:5432/cattleos_test
+        REDIS_URL: redis://localhost:6379/0
+        SECRET_KEY: test_secret_key
+      run: |
+        cd backend
+        pytest --cov=app --cov-report=json --cov-report=html tests/
+
+    - name: Enforce Coverage Gates
+      run: |
+        cd backend
+        python check_coverage.py coverage.json
+
+    - name: Upload Coverage Reports
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-report
+        path: backend/htmlcov/
+
+    - name: Generate Coverage Badge
+      if: github.ref == 'refs/heads/main'
+      run: |
+        cd backend
+        pip install coverage-badge
+        coverage-badge -o coverage.svg

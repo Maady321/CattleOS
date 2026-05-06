@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { LayoutDashboard, Users, HeartPulse, Milk, Pipette, Bell, Settings, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Users, HeartPulse, Milk, Pipette, Bell, Settings, LogOut, Menu, X, ShieldCheck } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useCattleStore } from '@/store/cattleStore';
 import { useRouter, usePathname } from 'next/navigation';
@@ -24,6 +24,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { icon: Milk, label: 'Production', href: '/dashboard/production', activeColor: 'bg-grass-green', iconColor: 'text-white' },
     { icon: Pipette, label: 'Breeding', href: '/dashboard/breeding', activeColor: 'bg-grass-green', iconColor: 'text-white' },
     { icon: Bell, label: 'Alerts', href: '/dashboard/alerts', activeColor: 'bg-grass-green', iconColor: 'text-white' },
+    { icon: ShieldCheck, label: 'Integrity', href: '/dashboard/integrity', activeColor: 'bg-cyan-500', iconColor: 'text-white' },
   ];
 
   const handleLogout = () => {

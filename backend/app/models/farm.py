@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, String, ForeignKey, Enum as SQLEnum, Boolean
+from sqlalchemy import Column, String, ForeignKey, Enum as SQLEnum, Boolean, BigInteger
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from app.db.base_class import Base, TimestampMixin, SoftDeleteMixin
@@ -15,6 +15,7 @@ class Farm(Base, TimestampMixin, SoftDeleteMixin):
     
     # ACTIVE, SUSPENDED, DELETED
     status = Column(String, default="ACTIVE", index=True) 
+    current_version = Column(BigInteger, server_default="1", nullable=False)
     
     owner = relationship("User", foreign_keys=[owner_id])
     cattle = relationship("Cattle", back_populates="farm", cascade="all, delete-orphan")

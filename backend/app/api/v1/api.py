@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.v1.endpoints import auth, cattle, farm, analytics, users, admin
+from app.api.v1.endpoints import auth, cattle, farm, analytics, users, admin, sync, integrity, messaging, operations, billing, observability, dr, voice, veterinary, subsidy, cooperative, insurance
 
 api_router = APIRouter()
 api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
@@ -8,3 +8,15 @@ api_router.include_router(users.router, prefix="/users", tags=["users"])
 api_router.include_router(farm.router, prefix="/farms", tags=["farms"])
 api_router.include_router(cattle.router, prefix="/cattle", tags=["cattle"])
 api_router.include_router(analytics.router, prefix="/analytics", tags=["analytics"])
+api_router.include_router(sync.router, prefix="/sync", tags=["sync"])
+api_router.include_router(integrity.router, prefix="/integrity", tags=["integrity"])
+api_router.include_router(messaging.router, prefix="/messaging", tags=["messaging"])
+api_router.include_router(operations.router, prefix="/ops", tags=["operations"])
+api_router.include_router(billing.router, prefix="/billing", tags=["billing"])
+api_router.include_router(observability.router, prefix="/observability", tags=["observability"])
+api_router.include_router(dr.router, prefix="/dr", tags=["dr"])
+api_router.include_router(voice.router, prefix="/voice", tags=["voice"])
+api_router.include_router(veterinary.router, prefix="/veterinary", tags=["veterinary"])
+api_router.include_router(subsidy.router, prefix="/subsidy", tags=["subsidy"])
+api_router.include_router(cooperative.router, prefix="/cooperative", tags=["cooperative"])
+api_router.include_router(insurance.router, prefix="/insurance", tags=["insurance"])
