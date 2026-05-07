@@ -14,6 +14,25 @@ class CorrelationIdFilter(logging.Filter):
         record.correlation_id = correlation_id_ctx.get()
         return True
 
+class SensitiveDataFilter(logging.Filter):
+    SENSITIVE_KEYS = {"password", "token", "secret", "key", "otp", "authorization"}
+
+    def filter(self, record):
+        if hasattr(record, "msg") and isinstance(record.msg, str):
+            # Mask common patterns
+            record.msg = self.mask_secrets(record.msg)
+        if hasattr(record, "args") and record.args:
+            record.args = tuple(self.mask_secrets(str(arg)) for arg in record.args)
+        return True
+
+    def mask_secrets(self, text: str) -> str:
+        # Simple masking logic for demo; in production use more robust regex
+        lowered = text.lower()
+        for key in self.SENSITIVE_KEYS:
+            if key in lowered:
+                return "[MASKED]"
+        return text
+
 def setup_logging():
     log_handler = logging.StreamHandler(sys.stdout)
     
@@ -27,9 +46,10 @@ def setup_logging():
     root_logger.addHandler(log_handler)
     root_logger.setLevel(settings.LOG_LEVEL)
     
-    # Add correlation ID filter to all handlers
+    # Add filters
     for handler in root_logger.handlers:
         handler.addFilter(CorrelationIdFilter())
+        handler.addFilter(SensitiveDataFilter())
 
     # Suppress verbose loggers
     logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
