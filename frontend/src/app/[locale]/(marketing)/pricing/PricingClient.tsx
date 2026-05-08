@@ -2,66 +2,46 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Check, ShieldCheck, Zap, Star, LayoutGrid, BarChart3, QrCode } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { PageHeader, CTASection } from '@/components/marketing/MarketingUI';
-
-const plans = [
-  {
-    name: "Starter",
-    price: "0",
-    desc: "For small hobby farms and individual owners.",
-    features: [
-      "Up to 5 Cattle Profiles",
-      "Digital Cattle Passports",
-      "Basic Production Logging",
-      "Standard Health Records",
-      "Malayalam Support"
-    ],
-    cta: "Start for Free",
-    popular: false,
-    color: "bg-black/5 text-black"
-  },
-  {
-    name: "Professional",
-    price: "1,499",
-    desc: "Optimized for scaling commercial dairy farms.",
-    features: [
-      "Unlimited Cattle Profiles",
-      "Advanced Milk Analytics",
-      "AI Health Diagnostics",
-      "Vaccination Reminders",
-      "PWA App Installation",
-      "Premium Dashboard Features"
-    ],
-    cta: "Get Started",
-    popular: true,
-    color: "bg-grass-green text-white"
-  },
-  {
-    name: "Enterprise",
-    price: "4,999",
-    desc: "Full infrastructure for cooperatives and large estates.",
-    features: [
-      "Multiple Farm Locations",
-      "Staff Role Management",
-      "Custom API Access",
-      "Advanced Export Reports",
-      "24/7 Dedicated Support",
-      "White-label Reports"
-    ],
-    cta: "Contact Sales",
-    popular: false,
-    color: "bg-patch-black text-white"
-  }
-];
+import { useParams } from 'next/navigation';
+import { translations, Language } from '@/lib/translations';
 
 export default function PricingClient() {
+  const params = useParams();
+  const lang = (params.locale as Language) || 'en';
+  const t = translations[lang].pricing;
+
+  const plans = [
+    {
+      ...t.starter,
+      cta: t.ctaFree,
+      popular: false,
+      color: "bg-black/5 text-black",
+      href: "/login"
+    },
+    {
+      ...t.pro,
+      cta: t.ctaBuy,
+      popular: true,
+      color: "bg-grass-green text-white",
+      href: "/login"
+    },
+    {
+      ...t.business,
+      cta: t.ctaContact,
+      popular: false,
+      color: "bg-patch-black text-white",
+      href: "/contact"
+    }
+  ];
+
   return (
     <div className="bg-ivory min-h-screen">
       <PageHeader 
         badge="Simple Pricing"
-        title={<>Plans that grow with your <span className="text-grass-green">Herd.</span></>}
-        subtitle="Transparent pricing with no hidden fees. Choose the plan that fits your farm's needs."
+        title={<>{t.title.split(' ').map((word, i) => i === t.title.split(' ').length - 1 ? <span key={i} className="text-grass-green">{word}</span> : word + ' ')}</>}
+        subtitle={t.sub}
       />
 
       <section className="pb-32 px-6 md:px-8 max-w-7xl mx-auto">
@@ -77,7 +57,7 @@ export default function PricingClient() {
             >
               {plan.popular && (
                 <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-grass-green text-white px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest shadow-xl shadow-green-200">
-                  Most Popular
+                  {t.mostPopular}
                 </div>
               )}
               
@@ -85,7 +65,7 @@ export default function PricingClient() {
                 <h3 className="text-2xl font-black mb-4">{plan.name}</h3>
                 <div className="flex items-baseline gap-2 mb-6">
                   <span className="text-5xl font-black tracking-tighter">₹{plan.price}</span>
-                  <span className="text-black/40 font-bold">/ month</span>
+                  <span className="text-black/40 font-bold">{t.monthly}</span>
                 </div>
                 <p className="text-black/60 font-medium text-sm leading-relaxed">{plan.desc}</p>
               </div>
@@ -102,7 +82,7 @@ export default function PricingClient() {
               </div>
 
               <a 
-                href={plan.name === "Enterprise" ? "/contact" : "/login"}
+                href={`/${lang}${plan.href}`}
                 className={`w-full py-5 rounded-2xl font-black text-center transition-all shadow-lg active:scale-95 ${plan.color}`}
               >
                 {plan.cta}
@@ -123,23 +103,23 @@ export default function PricingClient() {
                         <th className="py-6 font-black text-black/40 uppercase text-xs tracking-widest">Feature</th>
                         <th className="py-6 font-black text-center text-xs tracking-widest">Starter</th>
                         <th className="py-6 font-black text-center text-xs tracking-widest text-grass-green">Pro</th>
-                        <th className="py-6 font-black text-center text-xs tracking-widest">Enterprise</th>
+                        <th className="py-6 font-black text-center text-xs tracking-widest">Elite</th>
                      </tr>
                   </thead>
                   <tbody className="font-bold text-sm">
                      {[
-                       { name: "Digital Passport (QR)", starter: true, pro: true, enterprise: true },
-                       { name: "Health Analytics", starter: "Basic", pro: "Advanced", enterprise: "Full" },
-                       { name: "Staff Management", starter: false, pro: false, enterprise: true },
-                       { name: "Data Exports", starter: "CSV", pro: "CSV/PDF", enterprise: "Custom" },
-                       { name: "AI Diagnostics", starter: false, pro: true, enterprise: true },
-                       { name: "Support", starter: "Community", pro: "Email", enterprise: "24/7 Priority" }
+                       { name: "Digital Passport (QR)", starter: true, pro: true, elite: true },
+                       { name: "Health Analytics", starter: "Basic", pro: "Advanced", elite: "Full" },
+                       { name: "Staff Management", starter: false, pro: false, elite: true },
+                       { name: "Data Exports", starter: "CSV", pro: "CSV/PDF", elite: "Custom" },
+                       { name: "AI Diagnostics", starter: false, pro: true, elite: true },
+                       { name: "Support", starter: "Community", pro: "Email", elite: "24/7 Priority" }
                      ].map((row, i) => (
                        <tr key={i} className="border-b border-black/5 group hover:bg-black/[0.01] transition-colors">
                           <td className="py-6 text-black/70">{row.name}</td>
                           <td className="py-6 text-center">{typeof row.starter === 'boolean' ? (row.starter ? <Check className="mx-auto text-grass-green" size={16} /> : "—") : row.starter}</td>
                           <td className="py-6 text-center text-grass-green">{typeof row.pro === 'boolean' ? (row.pro ? <Check className="mx-auto text-grass-green" size={16} /> : "—") : row.pro}</td>
-                          <td className="py-6 text-center">{typeof row.enterprise === 'boolean' ? (row.enterprise ? <Check className="mx-auto text-grass-green" size={16} /> : "—") : row.enterprise}</td>
+                          <td className="py-6 text-center">{typeof row.elite === 'boolean' ? (row.elite ? <Check className="mx-auto text-grass-green" size={16} /> : "—") : row.elite}</td>
                        </tr>
                      ))}
                   </tbody>

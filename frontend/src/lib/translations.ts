@@ -140,6 +140,33 @@ export const translations = {
         primary: "Primary Farm",
         add: "Add New Farm Branch",
       }
+    },
+    pricing: {
+      title: "Plans that grow with your Herd.",
+      sub: "Transparent pricing with no hidden fees. Choose the plan that fits your farm's needs.",
+      starter: {
+        name: "Starter",
+        price: "0",
+        desc: "For small hobby farms and individual owners.",
+        features: ["Up to 5 Cattle Profiles", "Digital Cattle Passports", "Basic Production Logging", "Standard Health Records", "Malayalam Support"]
+      },
+      pro: {
+        name: "Professional",
+        price: "1,999",
+        desc: "Optimized for scaling commercial dairy farms.",
+        features: ["Unlimited Cattle Profiles", "Advanced Milk Analytics", "AI Health Diagnostics", "Vaccination Reminders", "PWA App Installation", "Premium Dashboard Features"]
+      },
+      business: {
+        name: "Business Elite",
+        price: "6,499",
+        desc: "Full infrastructure for cooperatives and large estates.",
+        features: ["Multiple Farm Locations", "Staff Role Management", "Custom API Access", "Advanced Export Reports", "24/7 Dedicated Support", "White-label Reports"]
+      },
+      ctaFree: "Start for Free",
+      ctaBuy: "Get Started",
+      ctaContact: "Contact Sales",
+      mostPopular: "Most Popular",
+      monthly: "/ month"
     }
   },
   ml: {
@@ -283,6 +310,33 @@ export const translations = {
         primary: "പ്രധാന ഫാം",
         add: "പുതിയ ഫാം ബ്രാഞ്ച് ചേർക്കുക",
       }
+    },
+    pricing: {
+      title: "നിങ്ങളുടെ ഫാം വളരുന്നതിനനുസരിച്ചുള്ള പ്ലാനുകൾ.",
+      sub: "മറഞ്ഞിരിക്കുന്ന നിരക്കുകൾ ഒന്നുമില്ല. നിങ്ങളുടെ ഫാമിന് അനുയോജ്യമായ പ്ലാൻ തിരഞ്ഞെടുക്കുക.",
+      starter: {
+        name: "സ്റ്റാർട്ടർ",
+        price: "0",
+        desc: "ചെറിയ ഫാമുകൾക്കും വ്യക്തിഗത ഉടമകൾക്കും.",
+        features: ["5 കന്നുകാലികൾ വരെ", "ഡിജിറ്റൽ പാസ്‌പോർട്ടുകൾ", "പ്രൊഡക്ഷൻ ലോഗിംഗ്", "ആരോഗ്യ വിവരങ്ങൾ", "മലയാളം സപ്പോർട്ട്"]
+      },
+      pro: {
+        name: "പ്രൊഫഷണൽ",
+        price: "1,999",
+        desc: "വാണിജ്യ ക്ഷീരഫാമുകൾക്ക് അനുയോജ്യം.",
+        features: ["പരിധിയില്ലാത്ത കന്നുകാലികൾ", "അഡ്വാൻസ്ഡ് അനലിറ്റിക്സ്", "AI ആരോഗ്യ പരിശോധന", "വാക്സിനേഷൻ അറിയിപ്പുകൾ", "PWA ആപ്പ് സപ്പോർട്ട്", "പ്രീമിയം ഡാഷ്‌ബോർഡ്"]
+      },
+      business: {
+        name: "ബിസിനസ് എലൈറ്റ്",
+        price: "6,499",
+        desc: "വലിയ എസ്റ്റേറ്റുകൾക്കും സഹകരണ സംഘങ്ങൾക്കും.",
+        features: ["ഒന്നിലധികം ഫാമുകൾ", "സ്റ്റാഫ് മാനേജ്‌മെന്റ്", "കസ്റ്റം API ആക്സസ്", "അഡ്വാൻസ്ഡ് റിപ്പോർട്ടുകൾ", "24/7 സപ്പോർട്ട്", "വൈറ്റ്-ലേബൽ റിപ്പോർട്ടുകൾ"]
+      },
+      ctaFree: "സൗജന്യമായി തുടങ്ങൂ",
+      ctaBuy: "ആരംഭിക്കുക",
+      ctaContact: "ബന്ധപ്പെടുക",
+      mostPopular: "ഏറ്റവും പ്രിയപ്പെട്ടത്",
+      monthly: "/ മാസം"
     }
   }
 };
