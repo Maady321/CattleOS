@@ -10,6 +10,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import OneTapActionMenu from '@/components/ui/OneTapActionMenu';
 import { translations, Language } from '@/lib/translations';
+import { supabase } from '@/lib/supabase';
+
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { logout, user, updateUser } = useAuthStore();
@@ -35,10 +37,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     updateUser({ language: lang === 'en' ? 'ml' : 'en' });
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     logout();
     router.push('/');
   };
+
 
   return (
     <div className="min-h-screen bg-black text-white selection:bg-emerald-500/30 overflow-x-hidden font-sans flex">
@@ -146,6 +150,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           >
             <Settings size={20} />
           </button>
+          <button 
+            onClick={handleLogout}
+            className="w-10 h-10 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400"
+          >
+            <LogOut size={20} />
+          </button>
+
         </div>
       </header>
 

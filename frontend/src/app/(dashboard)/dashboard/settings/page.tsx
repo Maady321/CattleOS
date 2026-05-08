@@ -2,14 +2,19 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { User, Shield, Bell, MapPin, Globe, Save, Camera, Smartphone, Mail, Lock, Languages } from 'lucide-react';
+import { User, Shield, Bell, MapPin, Globe, Save, Camera, Smartphone, Mail, Lock, Languages, LogOut } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+import { useRouter } from 'next/navigation';
+
 import { useCattleStore } from '@/store/cattleStore';
 import { useAuthStore } from '@/store/authStore';
 import { translations, Language } from '@/lib/translations';
 
 export default function SettingsPage() {
   const { cattle } = useCattleStore();
-  const { user, updateUser } = useAuthStore();
+  const { user, updateUser, logout } = useAuthStore();
+  const router = useRouter();
+
   const lang = (user?.language || 'en') as Language;
   const t = translations[lang] || translations.en;
   const [activeSection, setActiveSection] = useState('profile');
@@ -50,6 +55,14 @@ export default function SettingsPage() {
     }, 1000);
   };
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    logout();
+    router.push('/');
+  };
+
+
+
   const sections = [
     { id: 'profile', label: t.settingsPage.tabs.profile, icon: User },
     { id: 'farm', label: t.settingsPage.tabs.farm, icon: MapPin },
@@ -83,7 +96,16 @@ export default function SettingsPage() {
               {section.label}
             </button>
           ))}
+          
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-bold text-red-500 hover:bg-red-500/5 transition-all mt-8"
+          >
+            <LogOut size={20} />
+            {t.logout || 'Logout'}
+          </button>
         </div>
+
 
         {/* Content Area */}
         <div className="lg:col-span-3 space-y-8">
