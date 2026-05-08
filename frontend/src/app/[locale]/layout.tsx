@@ -6,7 +6,6 @@ import { ChatWidget } from "@/components/ui/ChatWidget";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { SchemaMarkup } from "@/components/SEO/SchemaMarkup";
 import { Navbar } from "@/components/landing/Navbar";
-import "./globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,8 +19,8 @@ const geistMono = Geist_Mono({
   display: 'swap',
 });
 
-export async function generateMetadata({ params }: { params: { locale: string } }): Promise<Metadata> {
-  const { locale } = params;
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
   const isMl = locale === 'ml';
 
   return {
@@ -75,14 +74,14 @@ export async function generateMetadata({ params }: { params: { locale: string } 
   };
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
   params,
 }: {
   children: React.ReactNode;
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }) {
-  const { locale } = params;
+  const { locale } = await params;
 
   return (
     <html lang={locale} className={`${geistSans.variable} ${geistMono.variable} h-full`}>

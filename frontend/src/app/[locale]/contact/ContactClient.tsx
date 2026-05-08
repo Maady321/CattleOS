@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Mail, MessageSquare, Phone, MapPin, Send, CheckCircle2 } from 'lucide-react';
+import { Mail, MessageSquare, Phone, MapPin, Send, CheckCircle2, ArrowRight } from 'lucide-react';
 import { PageHeader } from '@/components/marketing/MarketingUI';
 
 export default function ContactClient() {
