@@ -1,91 +1,33 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
-import { ChevronRight, Leaf, ShieldCheck, BarChart3, Languages, ArrowRight, Play, CheckCircle2, Menu, X } from 'lucide-react';
+import React, { useState } from 'react';
+import dynamic from 'next/dynamic';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import { Leaf, ShieldCheck, BarChart3, ArrowRight, Play, CheckCircle2 } from 'lucide-react';
 import { translations, Language } from '@/lib/translations';
 import Image from 'next/image';
-import { HolsteinBackground } from '@/components/ui/HolsteinBackground';
+
+// Client Components
+import { HeroVisuals } from '@/components/landing/HeroVisuals';
+
+// Dynamically import heavy/below-the-fold components
+const HolsteinBackground = dynamic(() => import('@/components/ui/HolsteinBackground').then(mod => mod.HolsteinBackground), { ssr: false });
+
+import { useParams } from 'next/navigation';
 
 export default function LandingPage() {
-  const [lang, setLang] = useState<Language>('en');
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const params = useParams();
+  const lang = (params.locale as Language) || 'en';
   const t = translations[lang];
   const { scrollY } = useScroll();
   const y1 = useTransform(scrollY, [0, 500], [0, -100]);
   const opacity = useTransform(scrollY, [0, 300], [1, 0]);
 
-  const toggleLang = () => setLang(prev => prev === 'en' ? 'ml' : 'en');
 
   return (
     <div className="relative min-h-screen font-sans selection:bg-grass-green selection:text-white overflow-x-hidden text-patch-black">
       <HolsteinBackground />
-
-      {/* Glass Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 px-4 md:px-8 py-4">
-        <div className="max-w-7xl mx-auto flex justify-between items-center bg-white/60 backdrop-blur-xl border border-white/20 px-6 md:px-8 py-3 md:py-4 rounded-[24px] shadow-premium">
-          <div className="flex items-center gap-3 text-xl md:text-2xl font-black tracking-tighter">
-            <Image 
-              src="/image.png" 
-              alt="CattleOS Logo" 
-              width={40} 
-              height={40} 
-              className="rounded-xl shadow-lg"
-            />
-            CattleOS
-          </div>
-          
-          <div className="hidden lg:flex items-center gap-10 font-bold text-sm uppercase tracking-widest text-black/60">
-            <a href="#features" className="hover:text-black transition-colors">{t.features}</a>
-            <a href="#" className="hover:text-black transition-colors">Testimonials</a>
-          </div>
-
-          <div className="hidden md:flex items-center gap-4">
-            <button onClick={toggleLang} className="flex items-center gap-2 px-4 py-2 rounded-full border border-black/5 hover:bg-black/5 transition-all font-bold text-xs uppercase">
-              <Languages size={14} />
-              {lang === 'en' ? 'മലയാളം' : 'English'}
-            </button>
-            <a href="/login" className="bg-patch-black text-white px-8 py-3 rounded-full hover:scale-105 active:scale-95 transition-all shadow-premium font-bold text-sm">
-              {t.getStarted}
-            </a>
-          </div>
-
-          {/* Mobile Menu Toggle */}
-          <button 
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="lg:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-black/5"
-          >
-            {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
-        </div>
-
-        {/* Mobile Menu Overlay */}
-        <AnimatePresence>
-          {isMenuOpen && (
-            <motion.div 
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="lg:hidden absolute top-24 left-4 right-4 bg-white/90 backdrop-blur-2xl border border-white/20 p-8 rounded-[32px] shadow-2xl z-40"
-            >
-              <div className="flex flex-col gap-6">
-                <a href="#features" onClick={() => setIsMenuOpen(false)} className="text-2xl font-black">{t.features}</a>
-                <a href="#" onClick={() => setIsMenuOpen(false)} className="text-2xl font-black">Testimonials</a>
-                <div className="pt-6 border-t border-black/5 flex flex-col gap-4">
-                  <button onClick={toggleLang} className="flex items-center justify-between w-full px-6 py-4 rounded-2xl bg-black/5 font-bold">
-                    <span className="flex items-center gap-3"><Languages size={18} /> Language</span>
-                    <span>{lang === 'en' ? 'മലയാളം' : 'English'}</span>
-                  </button>
-                  <a href="/login" className="w-full bg-patch-black text-white py-5 rounded-2xl text-center font-black shadow-lg">
-                    {t.getStarted}
-                  </a>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </nav>
-
+      
       {/* Hero Section */}
       <section className="relative pt-32 md:pt-48 pb-20 md:pb-40 px-6 md:px-8 max-w-7xl mx-auto">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-16 md:gap-24">
@@ -142,49 +84,7 @@ export default function LandingPage() {
             </motion.div>
           </div>
 
-          {/* Right Visual - Massive Logo on Black Card */}
-          <motion.div
-            initial={{ opacity: 0, x: 50, scale: 0.8 }}
-            animate={{ opacity: 1, x: 0, scale: 1 }}
-            transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-            className="flex-1 relative flex items-center justify-center"
-          >
-            <div className="relative w-[320px] h-[320px] md:w-[600px] md:h-[600px] bg-patch-black rounded-[60px] md:rounded-[120px] flex items-center justify-center shadow-[0_64px_128px_-20px_rgba(0,0,0,0.6)] overflow-hidden group">
-              {/* Animated Glow */}
-              <div className="absolute inset-0 bg-gradient-to-tr from-grass-green/20 to-transparent opacity-50 group-hover:scale-150 transition-transform duration-1000"></div>
-              
-              <Image 
-                src="/image.png" 
-                alt="CattleOS Premium Branding" 
-                width={500} 
-                height={500} 
-                className="relative z-10 w-56 h-56 md:w-96 md:h-96 rounded-[40px] md:rounded-[80px] shadow-2xl transition-all duration-700 group-hover:scale-110 group-hover:rotate-3"
-                priority
-              />
-              
-              {/* Tech Accents */}
-              <div className="absolute bottom-8 right-8 text-white/10 font-black italic tracking-widest text-xl select-none">
-                CATTLEOS v2.0
-              </div>
-            </div>
-
-            {/* Floating Stats Ornaments */}
-            <motion.div 
-              animate={{ y: [0, -20, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute -top-10 -right-4 bg-white/80 backdrop-blur-xl p-6 rounded-3xl shadow-2xl border border-white/50 hidden md:block"
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-grass-green rounded-2xl flex items-center justify-center text-white">
-                  <BarChart3 size={24} />
-                </div>
-                <div>
-                  <p className="text-[10px] font-black uppercase text-black/40">Efficiency</p>
-                  <p className="text-xl font-black">+42%</p>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
+          <HeroVisuals />
 
         </div>
       </section>
@@ -201,9 +101,10 @@ export default function LandingPage() {
                 <Play size={28} fill="black" />
              </button>
           </div>
-          <img 
+          <Image 
             src="/hero-cow.png" 
             alt="Cattle Management Dashboard" 
+            fill
             className="w-full h-full object-cover grayscale-[20%] group-hover:scale-105 transition-transform duration-1000"
           />
         </div>

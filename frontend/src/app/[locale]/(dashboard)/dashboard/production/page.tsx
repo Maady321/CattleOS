@@ -1,16 +1,26 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { useCattleStore } from '@/store/cattleStore';
 import { useAuthStore } from '@/store/authStore';
 import { translations, Language } from '@/lib/translations';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Milk, BarChart3, TrendingUp, DollarSign, Plus, Download, Calendar, Filter, ChevronRight, Droplets, X, Clock } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+
+// Dynamically import heavy chart components
+const AreaChart = dynamic(() => import('recharts').then(mod => mod.AreaChart), { ssr: false });
+const Area = dynamic(() => import('recharts').then(mod => mod.Area), { ssr: false });
+const XAxis = dynamic(() => import('recharts').then(mod => mod.XAxis), { ssr: false });
+const YAxis = dynamic(() => import('recharts').then(mod => mod.YAxis), { ssr: false });
+const CartesianGrid = dynamic(() => import('recharts').then(mod => mod.CartesianGrid), { ssr: false });
+const Tooltip = dynamic(() => import('recharts').then(mod => mod.Tooltip), { ssr: false });
+const ResponsiveContainer = dynamic(() => import('recharts').then(mod => mod.ResponsiveContainer), { ssr: false });
+const LineChart = dynamic(() => import('recharts').then(mod => mod.LineChart), { ssr: false });
+const Line = dynamic(() => import('recharts').then(mod => mod.Line), { ssr: false });
+
 
 
 export default function ProductionPage() {
@@ -162,7 +172,9 @@ export default function ProductionPage() {
     document.body.removeChild(link);
   };
 
-  const downloadQualityPDF = () => {
+  const downloadQualityPDF = async () => {
+    const { default: jsPDF } = await import('jspdf');
+    const { default: autoTable } = await import('jspdf-autotable');
     const doc = new jsPDF();
     
     // Header

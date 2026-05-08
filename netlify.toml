@@ -13,3 +13,15 @@
   from = "/api/v1/*"
   to = "/.netlify/functions/api/:splat"
   status = 200
+
+[[redirects]]
+  from = "http://cattle0s.netlify.app/*"
+  to = "https://cattle0s.netlify.app/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.cattle0s.netlify.app/*"
+  to = "https://cattle0s.netlify.app/:splat"
+  status = 301
+  force = true
