@@ -1,4 +1,4 @@
-# CattleOS — Production-Grade Dairy SaaS
+# CattleOS — Production-Grade Dairy SaaS 🚀
 
 CattleOS is a comprehensive, enterprise-quality platform designed for cattle farmers in Kerala, India. It provides advanced tracking for cattle health, milk production, breeding cycles, and more.
 
